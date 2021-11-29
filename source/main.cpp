@@ -104,7 +104,7 @@ public:
                     skipUntil = "";
                 }
                 // items to add to section
-                else if(!skip && inSection) {
+                else if(!skip && (inSection || this->m_section.length() < 1)) {
                     auto cheatToggleItem = new tsl::elm::ToggleListItem(cheat->getName(), cheat->isEnabled());
                     cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
 
@@ -258,7 +258,7 @@ public:
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
             renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("v1.0.2", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
+            renderer->drawString("v1.0.2b", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
                 renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));

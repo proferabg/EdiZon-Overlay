@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Atmosphère-NX
+ * Copyright (c) Atmosphère-NX
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms and conditions of the GNU General Public License,
@@ -15,8 +15,7 @@
  */
 
 #pragma once
-
-#include <edizon.h>
+#include <switch.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,7 +64,6 @@ Service* dmntchtGetServiceSession(void);
 
 Result dmntchtHasCheatProcess(bool *out);
 Result dmntchtGetCheatProcessEvent(Event *event);
-Result pmdmntAtmosphereGetProcessInfo(Handle* handle_out,  u64 pid);
 Result dmntchtGetCheatProcessMetadata(DmntCheatProcessMetadata *out_metadata);
 Result dmntchtForceOpenCheatProcess(void);
 Result dmntchtForceCloseCheatProcess(void);

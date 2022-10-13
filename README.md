@@ -13,6 +13,14 @@ v1.0.1
 v1.0.2
 
     Submenu Feature Added
+    
+v1.0.2c
+
+    Support for HOS 14.0.0
+
+V1.0.2d
+
+    Support for HOS 15.0.0
 
 # How To Use Submenus
 

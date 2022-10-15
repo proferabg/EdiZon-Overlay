@@ -1,26 +1,20 @@
-# EdiZon-Overlay
+# EdiZon-Overlay [![Github All Releases](https://img.shields.io/github/downloads/proferabg/EdiZon-Overlay/total.svg)]()
 
-Written by WerWolv
+Originally by [@WerWolv](https://www.github.com/WerWolv)
 
-Edited by proferabg
+Continued Support by proferabg
+<br />
+<br />
 
-# Changelog
-
-v1.0.1
-
-    Updated to libnx 4.2.0
-
-v1.0.2
-
-    Submenu Feature Added
-    
-v1.0.2c
-
-    Support for HOS 14.0.0
-
-V1.0.2d
+# Latest Changelog - v1.0.2d
 
     Support for HOS 15.0.0
+<br />
+
+# Known Issues
+
+* Wifi Signal will no longer display on HOS versions 15+
+<br />
 
 # How To Use Submenus
 

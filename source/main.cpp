@@ -189,7 +189,6 @@ public:
         auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "System Information");
 
         auto infos = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
-
             renderer->drawString("CPU Temparature:", false, 45, 160, 18, renderer->a(tsl::style::color::ColorText));
             renderer->drawString("PCB Temparature:", false, 45, 190, 18, renderer->a(tsl::style::color::ColorText));
 
@@ -200,7 +199,6 @@ public:
 
             renderer->drawRect(x, 303, w, 1, renderer->a(tsl::style::color::ColorFrame));
             renderer->drawString("Local IP:", false, 45, 330, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("WiFi Signal:", false, 45, 360, 18, renderer->a(tsl::style::color::ColorText));
 
             s32 temparature = 0;
             if(hosversionAtLeast(14,0,0)){
@@ -236,12 +234,37 @@ public:
             else 
                 renderer->drawString(this->m_ipAddressString.c_str(), false, 240, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
 
-            s32 signalStrength = 0;
-            wlaninfGetRSSI(&signalStrength);
+            if(hosversionAtLeast(15,0,0)){
+                NifmInternetConnectionType conType;
+                u32 wifiStrength;
+                NifmInternetConnectionStatus conStatus;
+                nifmGetInternetConnectionStatus(&conType, &wifiStrength, &conStatus);
+                renderer->drawString("Connection:", false, 45, 360, 18, renderer->a(tsl::style::color::ColorText));
+                if(conStatus == NifmInternetConnectionStatus_Connected && conType == NifmInternetConnectionType_WiFi) {
+                    std::string wifiStrengthStr = "(Strong)";
+                    tsl::Color color = tsl::Color(0x0, 0xF, 0x0, 0xF);
+                    if(wifiStrength == 2){
+                        wifiStrengthStr = "(Fair)";
+                        color = tsl::Color(0xE, 0xE, 0x2, 0xF);
+                    } else if(wifiStrength <= 1){
+                        wifiStrengthStr = "(Poor)";
+                        color = tsl::Color(0xF, 0x0, 0x0, 0xF);
+                    }
+                    renderer->drawString("WiFi", false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight));
+                    renderer->drawString(wifiStrengthStr.c_str(), false, 285, 360, 18, renderer->a(color));
+                } else if(conStatus == NifmInternetConnectionStatus_Connected && conType == NifmInternetConnectionType_Ethernet){
+                    renderer->drawString("Ethernet", false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight));
+                } else {
+                    renderer->drawString("Disconnected", false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight));
+                }
+            } else {
+                s32 signalStrength = 0;
+                wlaninfGetRSSI(&signalStrength);
 
-            renderer->drawString(formatString("%d dBm", signalStrength).c_str(), false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight)); 
+                renderer->drawString("WiFi Signal:", false, 45, 360, 18, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString(formatString("%d dBm", signalStrength).c_str(), false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight)); 
+            }
         });
-
         rootFrame->setContent(infos);
 
         return rootFrame;
@@ -265,7 +288,7 @@ public:
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
             renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("v1.0.2d", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
+            renderer->drawString("v1.0.3", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
                 renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));
@@ -280,7 +303,7 @@ public:
         auto list = new tsl::elm::List();
 
         auto cheatsItem = new tsl::elm::ListItem("Cheats");
-        auto statsItem  = new tsl::elm::ListItem("System information");
+        auto statsItem  = new tsl::elm::ListItem("System Information");
         cheatsItem->setClickListener([](s64 keys) {
             if (keys & HidNpadButton_A) {
                 tsl::changeTo<GuiCheats>("");
@@ -324,7 +347,9 @@ public:
         dmntchtInitialize();
         edz::cheat::CheatManager::initialize();
         tsInitialize();
-        if (!hosversionAtLeast(15,0,0)) {
+        if (hosversionAtLeast(15,0,0)) {
+            nifmInitialize(NifmServiceType_User);
+        } else {
             wlaninfInitialize();
         }
         clkrstInitialize();
@@ -337,6 +362,7 @@ public:
         edz::cheat::CheatManager::exit();
         tsExit();
         wlaninfExit();
+        nifmExit();
         clkrstExit();
         pcvExit();
     }

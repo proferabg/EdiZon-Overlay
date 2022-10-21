@@ -6,14 +6,10 @@ Continued Support by proferabg
 <br />
 <br />
 
-# Latest Changelog - v1.0.2d
+# Latest Changelog - v1.0.3
 
-    Support for HOS 15.0.0
-<br />
-
-# Known Issues
-
-* Wifi Signal will no longer display on HOS versions 15+
+    Full HOS 15 Support
+    Displays Connection Status instead of WiFi Signal in System Information on HOS versions 15+
 <br />
 
 # How To Use Submenus

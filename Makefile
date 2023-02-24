@@ -44,7 +44,7 @@ CFLAGS	:=	-g -Wall -O3 -ffunction-sections \
       
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations
 
-CXXFLAGS	:= $(CFLAGS) -fexceptions -std=gnu++17
+CXXFLAGS	:= $(CFLAGS) -fexceptions -std=gnu++20
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)

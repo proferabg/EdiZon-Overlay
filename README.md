@@ -6,10 +6,9 @@ Continued Support by proferabg
 <br />
 <br />
 
-# Latest Changelog - v1.0.3
+# Latest Changelog - v1.0.4
 
-    Full HOS 15 Support
-    Displays Connection Status instead of WiFi Signal in System Information on HOS versions 15+
+    Horizon OS 16.0.0 Support
 <br />
 
 # How To Use Submenus

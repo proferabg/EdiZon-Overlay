@@ -6,9 +6,10 @@ Continued Support by proferabg
 <br />
 <br />
 
-# Latest Changelog - v1.0.4
+# Latest Changelog - v1.0.5
 
-    Horizon OS 16.0.0 Support
+    Updated libtesla to fix crashes related to docked mode
+    Changed highlight color to light blue
 <br />
 
 # How To Use Submenus

@@ -6,10 +6,10 @@ Continued Support by proferabg
 <br />
 <br />
 
-# Latest Changelog - v1.0.5
+# Latest Changelog - v1.0.6
 
-    Updated libtesla to fix crashes related to docked mode
-    Changed highlight color to light blue
+    Allow overlay to run when using GDB
+    Pulled latest libnx with @masagrator's changes
 <br />
 
 # How To Use Submenus

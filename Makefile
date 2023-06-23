@@ -17,7 +17,7 @@ endif
 
 APP_TITLE		:=	EdiZon
 APP_AUTHOR		:=	WerWolv & proferabg
-APP_VERSION		:=	v1.0.5
+APP_VERSION		:=	v1.0.6
 
 TARGET			:=	EdiZon
 OUTDIR			:=	out
@@ -177,6 +177,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 all	:  $(OUTPUT).ovl
 
 $(OUTPUT).ovl	:	$(OUTPUT).nro
+	@cp $(OUTPUT).nro $(OUTPUT).ovl
 
 $(OUTPUT).nsp	:	$(OUTPUT).nso $(OUTPUT).npdm
 

@@ -142,10 +142,12 @@ namespace edz::cheat {
     /////// FrozenAddress Type ///////
 
     Result CheatManager::initialize() {
+        dmntchtInitialize();
         return CheatManager::reload();
     }   
 
     void CheatManager::exit() {
+        dmntchtExit();
         for (auto &cheat : CheatManager::s_cheats)
             delete cheat;
         CheatManager::s_cheats.clear();

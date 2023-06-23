@@ -2,5 +2,18 @@
 #.gitignore       #
 ###################
 
+#
+# Visual Studio Code
+#
+.settings/
+.classpath
+.factorypath
+.project
+.vscode/
+
+#
+# CMAKE
+#
 build/
 out/
+*.lst

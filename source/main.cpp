@@ -288,7 +288,7 @@ public:
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
             renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("v1.0.5", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
+            renderer->drawString("v1.0.6", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
                 renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));
@@ -302,31 +302,32 @@ public:
 
         auto list = new tsl::elm::List();
 
-        auto cheatsItem = new tsl::elm::ListItem("Cheats");
+        if(edz::cheat::CheatManager::isCheatServiceAvailable()){
+            auto cheatsItem = new tsl::elm::ListItem("Cheats");
+            cheatsItem->setClickListener([](s64 keys) {
+                if (keys & HidNpadButton_A) {
+                    tsl::changeTo<GuiCheats>("");
+                    return true;
+                }
+                return false;
+            });
+            list->addItem(cheatsItem);
+        } else {
+            auto noDmntSvc = new tsl::elm::ListItem("Cheat Service Unavailable!");
+            list->addItem(noDmntSvc);
+        }
+
         auto statsItem  = new tsl::elm::ListItem("System Information");
-        cheatsItem->setClickListener([](s64 keys) {
-            if (keys & HidNpadButton_A) {
-                tsl::changeTo<GuiCheats>("");
-                return true;
-            }
-
-            return false;
-        });
-
         statsItem->setClickListener([](s64 keys) {
             if (keys & HidNpadButton_A) {
                 tsl::changeTo<GuiStats>();
                 return true;
             }
-
             return false;
         });
-
-        list->addItem(cheatsItem);
         list->addItem(statsItem);
 
         rootFrame->setContent(list);
-
         return rootFrame;
     }
 
@@ -344,8 +345,8 @@ public:
     ~EdiZonOverlay() { }
 
     void initServices() override {
-        dmntchtInitialize();
-        edz::cheat::CheatManager::initialize();
+        if(edz::cheat::CheatManager::isCheatServiceAvailable()) // GDB Check
+            edz::cheat::CheatManager::initialize();
         tsInitialize();
         if (hosversionAtLeast(15,0,0)) {
             nifmInitialize(NifmServiceType_User);
@@ -354,12 +355,11 @@ public:
         }
         clkrstInitialize();
         pcvInitialize();
-
     } 
 
     virtual void exitServices() override {
-        dmntchtExit();
-        edz::cheat::CheatManager::exit();
+        if(edz::cheat::CheatManager::isCheatServiceAvailable())
+            edz::cheat::CheatManager::exit();
         tsExit();
         wlaninfExit();
         nifmExit();

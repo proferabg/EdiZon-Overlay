@@ -80,7 +80,7 @@ namespace edz::cheat {
 
         static bool isCheatServiceAvailable();
 
-        static bool forceAttach();
+        static Result forceAttach();
         static bool hasCheatProcess();
 
         static u64 getTitleID();

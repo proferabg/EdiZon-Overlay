@@ -6,10 +6,11 @@ Continued Support by proferabg
 <br />
 <br />
 
-# Latest Changelog - v1.0.6
+# Latest Changelog - v1.0.7
 
-    Allow overlay to run when using GDB
-    Pulled latest libnx with @masagrator's changes
+    Squashed some more crashing issues!
+    Fixed mismatched cheats when hiding and showing the overlay.
+    Added a way to disable submenu logic for those who requested it.
 <br />
 
 # How To Use Submenus
@@ -31,6 +32,12 @@ Example:
     00000000 00000000 00000000
 
 This will create a submenu called ***Item Codes*** with ***Items x999*** being a cheat in that submenu.
+
+You can also disable the submenu feature (skips submenu items in cheat file).
+To do so, insert the following at the very top of the file.
+
+    [--DisableSubmenus--]
+    00000000 00000000 00000000
 
 Warning: Having too many cheats at once can lead to stability issues and can crash.
 

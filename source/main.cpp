@@ -47,10 +47,9 @@ public:
     ~GuiCheats() { }
 
     virtual tsl::elm::Element* createUI() override {
-        this->m_cheats = edz::cheat::CheatManager::getCheats();
         auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "Cheats");
 
-        if (m_cheats.size() == 0) {
+        if (edz::cheat::CheatManager::getCheats().size() == 0) {
             auto warning = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
                 renderer->drawString("\uE150", false, 180, 250, 90, renderer->a(0xFFFF));
                 renderer->drawString("No Cheats loaded!", false, 110, 340, 25, renderer->a(0xFFFF));
@@ -65,50 +64,65 @@ public:
             if(m_section.length() > 0) list->addItem(new tsl::elm::CategoryHeader(head));
             else list->addItem(new tsl::elm::CategoryHeader("Available cheats"));
 
-            bool skip = false, inSection = false;
+            bool skip = false, inSection = false, submenus = true;
             std::string skipUntil = "";
 
-            for (auto &cheat : this->m_cheats) {
-                // Find section start and end
-                if(this->m_section.length() > 0 && !inSection && cheat->getName().find("--SectionStart:" + this->m_section + "--") == std::string::npos) continue;
-                else if(cheat->getName().find("--SectionStart:" + this->m_section + "--") != std::string::npos) { inSection = true; continue; }
-                else if(inSection && cheat->getName().find("--SectionEnd:" + this->m_section + "--") != std::string::npos) break;
+            for (auto &cheat : edz::cheat::CheatManager::getCheats()) {
+                if(cheat->getID() == 1 && cheat->getName().find("--DisableSubmenus--") != std::string::npos)
+                    submenus = false;
 
-                // new section
-                if(!skip && cheat->getName().find("--SectionStart:") != std::string::npos){
+                if(submenus){
+                    // Find section start and end
+                    if(this->m_section.length() > 0 && !inSection && cheat->getName().find("--SectionStart:" + this->m_section + "--") == std::string::npos) continue;
+                    else if(cheat->getName().find("--SectionStart:" + this->m_section + "--") != std::string::npos) { inSection = true; continue; }
+                    else if(inSection && cheat->getName().find("--SectionEnd:" + this->m_section + "--") != std::string::npos) break;
 
-                    //remove formatting
-                    std::string name = cheat->getName();
-                    replaceAll(name, "--", "");
-                    replaceAll(name, "SectionStart:", "");
+                    // new section
+                    if(!skip && cheat->getName().find("--SectionStart:") != std::string::npos){
 
-                    //create submenu button
-                    auto cheatsSubmenu = new tsl::elm::ListItem(name);
-                    cheatsSubmenu->setClickListener([name = name](s64 keys) {
-                        if (keys & HidNpadButton_A) {
-                            tsl::changeTo<GuiCheats>(name);
-                            return true;
-                        }
-                        return false;
-                    });
-                    list->addItem(cheatsSubmenu);
-                    this->m_numCheats++;
+                        //remove formatting
+                        std::string name = cheat->getName();
+                        replaceAll(name, "--", "");
+                        replaceAll(name, "SectionStart:", "");
 
-                    //skip over items in section
-                    skip = true;
-                    skipUntil = "--SectionEnd:" + name + "--";
-                }
-                // found end of child section
-                else if (skip && cheat->getName().compare(skipUntil) == 0){
-                    skip = false;
-                    skipUntil = "";
-                }
-                // items to add to section
-                else if(!skip && (inSection || this->m_section.length() < 1)) {
+                        //create submenu button
+                        auto cheatsSubmenu = new tsl::elm::ListItem(name);
+                        cheatsSubmenu->setClickListener([name = name](s64 keys) {
+                            if (keys & HidNpadButton_A) {
+                                tsl::changeTo<GuiCheats>(name);
+                                return true;
+                            }
+                            return false;
+                        });
+                        list->addItem(cheatsSubmenu);
+                        this->m_numCheats++;
+
+                        //skip over items in section
+                        skip = true;
+                        skipUntil = "--SectionEnd:" + name + "--";
+                    }
+                    // found end of child section
+                    else if (skip && cheat->getName().compare(skipUntil) == 0){
+                        skip = false;
+                        skipUntil = "";
+                    }
+                    // items to add to section
+                    else if(!skip && (inSection || this->m_section.length() < 1)) {
+                        auto cheatToggleItem = new tsl::elm::ToggleListItem(/*formatString("%d:%s: %s", cheat->getID(), (cheat->isEnabled() ? "y" : "n"),*/ cheat->getName()/*.c_str()).c_str()*/, cheat->isEnabled());
+                        cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
+
+                        this->m_cheatToggleItems.insert({cheat->getID(), cheatToggleItem});
+                        list->addItem(cheatToggleItem);
+                        this->m_numCheats++;
+                    }
+                } else {
+                    if(cheat->getName().find("--SectionStart:") != std::string::npos || cheat->getName().find("--SectionEnd:") != std::string::npos || cheat->getName().find("--DisableSubmenus--") != std::string::npos)
+                        continue;
+
                     auto cheatToggleItem = new tsl::elm::ToggleListItem(cheat->getName(), cheat->isEnabled());
                     cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
 
-                    this->m_cheatToggleItems.insert({cheat, cheatToggleItem});
+                    this->m_cheatToggleItems.insert({cheat->getID(), cheatToggleItem});
                     list->addItem(cheatToggleItem);
                     this->m_numCheats++;
                 }
@@ -128,18 +142,6 @@ public:
         return rootFrame;
     }
 
-    int FindSectionStart(){
-        for(u32 i = 0; i < this->m_cheats.size(); i++)
-            if(this->m_cheats[i]->getName().find("--SectionStart:" + m_section + "--") != std::string::npos) return i + 1;
-        return 0;
-    }
-
-    int FindSectionEnd(){
-        for(u32 i = 0; i < this->m_cheats.size(); i++)
-            if(this->m_cheats[i]->getName().find("--SectionEnd:" + m_section + "--") != std::string::npos) return i;
-        return this->m_cheats.size();
-    }
-
     void replaceAll(std::string& str, const std::string& from, const std::string& to) {
         if(from.empty())
             return;
@@ -150,16 +152,17 @@ public:
         }
     }
 
-    virtual void update() {
-        for (auto const& [Cheat, Button] : this->m_cheatToggleItems)
-            Button->setState(Cheat->isEnabled());
+    virtual void update() override {
+        for (auto const& [cheatId, toggleElem] : this->m_cheatToggleItems)
+            for(auto &cheat : edz::cheat::CheatManager::getCheats())
+                if(cheat->getID() == cheatId)
+                    toggleElem->setState(cheat->isEnabled());
     }
 
 private:
     int m_numCheats = 0;
     std::string m_section;
-    std::vector<edz::cheat::Cheat*> m_cheats;
-    std::map<edz::cheat::Cheat*, tsl::elm::ToggleListItem*> m_cheatToggleItems;
+    std::map<u32, tsl::elm::ToggleListItem*> m_cheatToggleItems;
 };
 
 class GuiStats : public tsl::Gui {
@@ -288,7 +291,7 @@ public:
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
             renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("v1.0.6", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
+            renderer->drawString("v1.0.7", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
                 renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));

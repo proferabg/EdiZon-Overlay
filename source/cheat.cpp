@@ -166,16 +166,23 @@ namespace edz::cheat {
         return !!running; 
     }
 
-    bool CheatManager::forceAttach() {
+    Result CheatManager::forceAttach() {
         if (!CheatManager::isCheatServiceAvailable())
             return ResultEdzCheatServiceNotAvailable;
 
-        return Succeeded(dmntchtForceOpenCheatProcess());
+        uint64_t PID = 0;
+        for(int i = 0; i < 10; i++) {
+            if (R_SUCCEEDED(pmdmntGetApplicationProcessId(&PID))) {
+                return dmntchtForceOpenCheatProcess();
+            }
+            svcSleepThread(100'000'000);
+        }
+        return ResultEdzAttachFailed;
     }
 
     bool CheatManager::hasCheatProcess() {
-        if (!CheatManager::isCheatServiceAvailable())
-            return ResultEdzCheatServiceNotAvailable;
+        if (R_FAILED(CheatManager::forceAttach()))
+            return false;
 
         bool hasCheatProcess;
 
@@ -336,7 +343,8 @@ namespace edz::cheat {
 
         Result res;
 
-        CheatManager::forceAttach();
+        if (R_FAILED(res = CheatManager::forceAttach()))
+            return res;
 
         // Delete local cheats copy if there are any
         for (auto &cheat : CheatManager::s_cheats)

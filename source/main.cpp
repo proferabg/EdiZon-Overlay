@@ -108,7 +108,10 @@ public:
                     }
                     // items to add to section
                     else if(!skip && (inSection || this->m_section.length() < 1)) {
-                        auto cheatToggleItem = new tsl::elm::ToggleListItem(/*formatString("%d:%s: %s", cheat->getID(), (cheat->isEnabled() ? "y" : "n"),*/ cheat->getName()/*.c_str()).c_str()*/, cheat->isEnabled());
+                        std::string cheatNameCheck = cheat->getName();
+                        replaceAll(cheatNameCheck, ":ENABLED", "");
+
+                        auto cheatToggleItem = new tsl::elm::ToggleListItem(/*formatString("%d:%s: %s", cheat->getID(), (cheat->isEnabled() ? "y" : "n"),*/ cheatNameCheck/*.c_str()).c_str()*/, cheat->isEnabled());
                         cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
 
                         this->m_cheatToggleItems.insert({cheat->getID(), cheatToggleItem});
@@ -119,7 +122,10 @@ public:
                     if(cheat->getName().find("--SectionStart:") != std::string::npos || cheat->getName().find("--SectionEnd:") != std::string::npos || cheat->getName().find("--DisableSubmenus--") != std::string::npos)
                         continue;
 
-                    auto cheatToggleItem = new tsl::elm::ToggleListItem(cheat->getName(), cheat->isEnabled());
+                    std::string cheatNameCheck = cheat->getName();
+                    replaceAll(cheatNameCheck, ":ENABLED", "");
+
+                    auto cheatToggleItem = new tsl::elm::ToggleListItem(cheatNameCheck, cheat->isEnabled());
                     cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
 
                     this->m_cheatToggleItems.insert({cheat->getID(), cheatToggleItem});
@@ -203,18 +209,23 @@ public:
             renderer->drawRect(x, 303, w, 1, renderer->a(tsl::style::color::ColorFrame));
             renderer->drawString("Local IP:", false, 45, 330, 18, renderer->a(tsl::style::color::ColorText));
 
-            s32 temparature = 0;
-            if(hosversionAtLeast(14,0,0)){
-                tsGetTemperature(TsLocation_Internal, &temparature);
-                renderer->drawString(formatString("%d °C", temparature).c_str(), false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));
-                tsGetTemperature(TsLocation_External, &temparature);
-                renderer->drawString(formatString("%d °C", temparature).c_str(), false, 240, 190, 18, renderer->a(tsl::style::color::ColorHighlight));
-            } else {
-                tsGetTemperatureMilliC(TsLocation_Internal, &temparature);
-                renderer->drawString(formatString("%.02f °C", temparature / 1000.0F).c_str(), false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));
-                tsGetTemperatureMilliC(TsLocation_External, &temparature);
-                renderer->drawString(formatString("%.02f °C", temparature / 1000.0F).c_str(), false, 240, 190, 18, renderer->a(tsl::style::color::ColorHighlight));
+            float socTemperature = 0, pcbTemperature = 0;
+            if(hosversionAtLeast(10,0,0)){
+              TsSession ts_session;
+              Result rc = tsOpenSession(&ts_session, TsDeviceCode_LocationExternal);
+              if (R_SUCCEEDED(rc)) {
+                tsSessionGetTemperature(&ts_session, &socTemperature);
+                tsSessionClose(&ts_session);
+              }
+              rc = tsOpenSession(&ts_session, TsDeviceCode_LocationInternal);
+              if (R_SUCCEEDED(rc)) {
+                tsSessionGetTemperature(&ts_session, &pcbTemperature);
+                tsSessionClose(&ts_session);
+              }
             }
+            renderer->drawString(formatString("%.1f °C", socTemperature).c_str(), false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(formatString("%.1f °C", pcbTemperature).c_str(), false, 240, 190, 18, renderer->a(tsl::style::color::ColorHighlight));
+            
 
             u32 cpuClock = 0, gpuClock = 0, memClock = 0;
 
@@ -291,7 +302,7 @@ public:
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
             renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("v1.0.7", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
+            renderer->drawString("v1.0.8", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
                 renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));
@@ -340,6 +351,7 @@ public:
     static inline std::string s_runningTitleIDString;
     static inline std::string s_runningProcessIDString;
     static inline std::string s_runningBuildIDString;
+    static inline bool b_firstRun = true;
 };
 
 class EdiZonOverlay : public tsl::Overlay {
@@ -348,8 +360,15 @@ public:
     ~EdiZonOverlay() { }
 
     void initServices() override {
-        if(edz::cheat::CheatManager::isCheatServiceAvailable()) // GDB Check
+        // GDB Check & Saved Cheat Enabling
+        if(edz::cheat::CheatManager::isCheatServiceAvailable()){
             edz::cheat::CheatManager::initialize();
+            for (auto &cheat : edz::cheat::CheatManager::getCheats()) {
+                if(cheat->getName().find(":ENABLED") != std::string::npos){
+                    cheat->setState(true);
+                }
+            }
+        }
         tsInitialize();
         if (hosversionAtLeast(15,0,0)) {
             nifmInitialize(NifmServiceType_User);

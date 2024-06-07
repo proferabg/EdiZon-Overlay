@@ -6,16 +6,16 @@ Continued Support by proferabg
 <br />
 <br />
 
-# Latest Changelog - v1.0.7
+# Latest Changelog - v1.0.8
 
-    Squashed some more crashing issues!
-    Fixed mismatched cheats when hiding and showing the overlay.
-    Added a way to disable submenu logic for those who requested it.
+    Updated libnx
+    Fixed temperature rendering
+    Added Enabling Cheats by Default on Overlay Open
 <br />
 
 # How To Use Submenus
 
-In your cheat text document you can add submenus by using these 2 tags
+In your cheat text document, you can add submenus by using these 2 tags
 
     [--SectionStart:<Section Name>--]
     [--SectionEnd:<Section Name>--]
@@ -40,4 +40,16 @@ To do so, insert the following at the very top of the file.
     00000000 00000000 00000000
 
 Warning: Having too many cheats at once can lead to stability issues and can crash.
+<br />
 
+# How To Enable Cheats by Default on Overlay Open
+
+In your cheat text document, you can have cheats turn on by default on opening of the overlay.
+To do this, simply find the cheat you want to enable by default and add ***:ENABLED*** onto the end of the name.
+
+Example:
+
+    [60 FPS Mod:ENABLED]
+    00000000 00000000 00000000
+
+Warning: This will turn the cheat on every time the overlay is relaunched. Also, turning the cheat off in the menu and relaunching the overlay will turn the cheat back on.

@@ -32,11 +32,11 @@
 cd "$(dirname "$0")"
 
 # Create the /lib directory if it doesn't exist
-mkdir -p lib
+mkdir -p libs
 
 # Remove existing libultra and libtesla directories if they exist
-rm -rf lib/libultra
-rm -rf lib/libtesla
+rm -rf libs/libultra
+rm -rf libs/libtesla
 
 # Initialize a new git repository
 git init temp-lib
@@ -57,9 +57,9 @@ git pull origin main
 
 # Move the directories to the correct place
 cd ..
-mkdir -p lib/libultra lib/libtesla
-mv temp-lib/lib/libultra/* lib/libultra/
-mv temp-lib/lib/libtesla/* lib/libtesla/
+mkdir -p libs/libultra libs/libtesla
+mv temp-lib/lib/libultra/* libs/libultra/
+mv temp-lib/lib/libtesla/* libs/libtesla/
 
 # Clean up
 rm -rf temp-lib

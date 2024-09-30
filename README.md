@@ -2,6 +2,21 @@
 
 Originally by [@WerWolv](https://www.github.com/WerWolv)
 
+Continued Support by ppkantorski
+<br />
+<br />
+
+# Latest Changelog - v1.0.9
+    Updated libnx.
+    Now utilizing libtesla (Ultrahand) & libultra.
+    Custom wallpaper / theme support.
+    Users can override the system wallpaper / theme with `sdmc:/config/edizon/wallpaper.rgba` and `sdmc:/config/edizon/theme.ini`.
+    Faster opening / game detection.
+    Fix for local IP calls.
+    Temperature readings are now done through i2c.
+<br />
+
+
 Continued Support by proferabg
 <br />
 <br />

@@ -25,7 +25,6 @@
 #include <string.h>
 
 #include <switch.h>
-#include <filesystem>
 
 #include <switch/nro.h>
 #include <switch/nacp.h>
@@ -88,7 +87,11 @@ public:
                         //create submenu button
                         auto cheatsSubmenu = new tsl::elm::ListItem(name);
                         cheatsSubmenu->setClickListener([name = name](s64 keys) {
-                            if (keys & HidNpadButton_A) {
+                            if (simulatedSelect) {
+                                keys |= KEY_A;
+                                simulatedSelect = false;
+                            }
+                            if (keys & KEY_A) {
                                 tsl::changeTo<GuiCheats>(name);
                                 return true;
                             }
@@ -148,6 +151,22 @@ public:
         return rootFrame;
     }
 
+    bool handleInput(u64 keysDown, u64 keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
+    
+        // Handle the rest of the input only if the game is not paused and not over
+        if (simulatedBack) {
+            keysDown |= KEY_B;
+            simulatedBack = false;
+        }
+
+         // Allow closing the overlay with KEY_B only when paused or game over
+        if (keysDown & KEY_B) {
+            tsl::goBack();
+        }
+        
+        return false;
+    }
+
     void replaceAll(std::string& str, const std::string& from, const std::string& to) {
         if(from.empty())
             return;
@@ -181,7 +200,7 @@ public:
         }
 
         tsl::hlp::doWithSmSession([this]{
-            this->m_ipAddress = gethostid();
+            nifmGetCurrentIpAddress(&this->m_ipAddress);
             this->m_ipAddressString = formatString("%d.%d.%d.%d", this->m_ipAddress & 0xFF, (this->m_ipAddress >> 8) & 0xFF, (this->m_ipAddress >> 16) & 0xFF, (this->m_ipAddress >> 24) & 0xFF);
         });
 
@@ -198,8 +217,8 @@ public:
         auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "System Information");
 
         auto infos = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
-            renderer->drawString("CPU Temparature:", false, 45, 160, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("PCB Temparature:", false, 45, 190, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("CPU Temperature:", false, 45, 160, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("PCB Temperature:", false, 45, 190, 18, renderer->a(tsl::style::color::ColorText));
 
             renderer->drawRect(x, 203, w, 1, renderer->a(tsl::style::color::ColorFrame));
             renderer->drawString("CPU Clock:", false, 45, 230, 18, renderer->a(tsl::style::color::ColorText));
@@ -209,22 +228,35 @@ public:
             renderer->drawRect(x, 303, w, 1, renderer->a(tsl::style::color::ColorFrame));
             renderer->drawString("Local IP:", false, 45, 330, 18, renderer->a(tsl::style::color::ColorText));
 
-            float socTemperature = 0, pcbTemperature = 0;
-            if(hosversionAtLeast(10,0,0)){
-              TsSession ts_session;
-              Result rc = tsOpenSession(&ts_session, TsDeviceCode_LocationExternal);
-              if (R_SUCCEEDED(rc)) {
-                tsSessionGetTemperature(&ts_session, &socTemperature);
-                tsSessionClose(&ts_session);
-              }
-              rc = tsOpenSession(&ts_session, TsDeviceCode_LocationInternal);
-              if (R_SUCCEEDED(rc)) {
-                tsSessionGetTemperature(&ts_session, &pcbTemperature);
-                tsSessionClose(&ts_session);
-              }
-            }
-            renderer->drawString(formatString("%.1f °C", socTemperature).c_str(), false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));
-            renderer->drawString(formatString("%.1f °C", pcbTemperature).c_str(), false, 240, 190, 18, renderer->a(tsl::style::color::ColorHighlight));
+            //float socTemperature = 0, pcbTemperature = 0;
+            //if(hosversionAtLeast(10,0,0)){
+            //  TsSession ts_session;
+            //  Result rc = tsOpenSession(&ts_session, TsDeviceCode_LocationExternal);
+            //  if (R_SUCCEEDED(rc)) {
+            //    tsSessionGetTemperature(&ts_session, &socTemperature);
+            //    tsSessionClose(&ts_session);
+            //  }
+            //  rc = tsOpenSession(&ts_session, TsDeviceCode_LocationInternal);
+            //  if (R_SUCCEEDED(rc)) {
+            //    tsSessionGetTemperature(&ts_session, &pcbTemperature);
+            //    tsSessionClose(&ts_session);
+            //  }
+            //}
+
+            // Draw temperatures and battery percentage
+            static char PCB_temperatureStr[10];
+            static char SOC_temperatureStr[10];
+            
+
+            ReadSocTemperature(&SOC_temperature, false);
+            ReadPcbTemperature(&PCB_temperature, false);
+
+            snprintf(SOC_temperatureStr, sizeof(SOC_temperatureStr) - 1, "%.1f °C", static_cast<double>(SOC_temperature));
+            snprintf(PCB_temperatureStr, sizeof(PCB_temperatureStr) - 1, "%.1f °C", static_cast<double>(PCB_temperature));
+            
+
+            renderer->drawString(SOC_temperatureStr, false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(PCB_temperatureStr, false, 240, 190, 18, renderer->a(tsl::style::color::ColorHighlight));
             
 
             u32 cpuClock = 0, gpuClock = 0, memClock = 0;
@@ -243,7 +275,7 @@ public:
             renderer->drawString(formatString("%.01f MHz", gpuClock / 1'000'000.0F).c_str(), false, 240, 260, 18, renderer->a(tsl::style::color::ColorHighlight));
             renderer->drawString(formatString("%.01f MHz", memClock / 1'000'000.0F).c_str(), false, 240, 290, 18, renderer->a(tsl::style::color::ColorHighlight));
 
-            if (this->m_ipAddress == INADDR_LOOPBACK)
+            if (this->m_ipAddressString ==  "0.0.0.0")
                 renderer->drawString("Offline", false, 240, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
             else 
                 renderer->drawString(this->m_ipAddressString.c_str(), false, 240, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
@@ -286,11 +318,27 @@ public:
 
     virtual void update() { }
 
+    bool handleInput(u64 keysDown, u64 keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
+    
+        // Handle the rest of the input only if the game is not paused and not over
+        if (simulatedBack) {
+            keysDown |= KEY_B;
+            simulatedBack = false;
+        }
+
+         // Allow closing the overlay with KEY_B only when paused or game over
+        if (keysDown & KEY_B) {
+            tsl::goBack();
+        }
+        
+        return false;
+    }
 private:
     ClkrstSession m_clkrstSessionCpu, m_clkrstSessionGpu, m_clkrstSessionMem;
-    long m_ipAddress;
+    u32 m_ipAddress;
     std::string m_ipAddressString;
 };
+
 
 class GuiMain : public tsl::Gui {
 public:
@@ -301,8 +349,8 @@ public:
     virtual tsl::elm::Element* createUI() {
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("v1.0.8", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
+            renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::defaultTextColor));
+            renderer->drawString("v1.0.8", false, 20, 70, 15, renderer->a(tsl::versionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
                 renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));
@@ -319,7 +367,12 @@ public:
         if(edz::cheat::CheatManager::isCheatServiceAvailable()){
             auto cheatsItem = new tsl::elm::ListItem("Cheats");
             cheatsItem->setClickListener([](s64 keys) {
-                if (keys & HidNpadButton_A) {
+                if (simulatedSelect) {
+                    keys |= KEY_A;
+                    simulatedSelect = false;
+                }
+
+                if (keys & KEY_A) {
                     tsl::changeTo<GuiCheats>("");
                     return true;
                 }
@@ -333,7 +386,12 @@ public:
 
         auto statsItem  = new tsl::elm::ListItem("System Information");
         statsItem->setClickListener([](s64 keys) {
-            if (keys & HidNpadButton_A) {
+            if (simulatedSelect) {
+                keys |= KEY_A;
+                simulatedSelect = false;
+            }
+
+            if (keys & KEY_A) {
                 tsl::changeTo<GuiStats>();
                 return true;
             }
@@ -347,12 +405,37 @@ public:
 
     virtual void update() { }
 
+    bool handleInput(u64 keysDown, u64 keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
+    
+        // Handle the rest of the input only if the game is not paused and not over
+        if (simulatedBack) {
+            keysDown |= KEY_B;
+            simulatedBack = false;
+        }
+
+         // Allow closing the overlay with KEY_B only when paused or game over
+        if (keysDown & KEY_B) {
+            tsl::goBack();
+        }
+        
+        return false;
+    }
+
 public:
     static inline std::string s_runningTitleIDString;
     static inline std::string s_runningProcessIDString;
     static inline std::string s_runningBuildIDString;
     static inline bool b_firstRun = true;
 };
+
+
+void reloadCheatManager() {
+    edz::cheat::CheatManager::reload();
+    GuiMain::s_runningTitleIDString     = formatString("%016lX", edz::cheat::CheatManager::getTitleID());
+    GuiMain::s_runningBuildIDString     = formatString("%016lX", edz::cheat::CheatManager::getBuildID());
+    GuiMain::s_runningProcessIDString   = formatString("%lu", edz::cheat::CheatManager::getProcessID());
+}
+
 
 class EdiZonOverlay : public tsl::Overlay {
 public:
@@ -369,31 +452,50 @@ public:
                 }
             }
         }
-        tsInitialize();
-        if (hosversionAtLeast(15,0,0)) {
-            nifmInitialize(NifmServiceType_User);
-        } else {
-            wlaninfInitialize();
-        }
         clkrstInitialize();
         pcvInitialize();
+
+
+        fsdevMountSdmc();
+        splInitialize();
+        spsmInitialize();
+        i2cInitialize();
+        ASSERT_FATAL(socketInitializeDefault());
+        ASSERT_FATAL(nifmInitialize(NifmServiceType_User));
+        ASSERT_FATAL(smInitialize());
+
+
+
+        if (isFileOrDirectory("sdmc:/config/edizon/theme.ini"))
+            THEME_CONFIG_INI_PATH = "sdmc:/config/edizon/theme.ini"; // Override theme path (optional)
+        if (isFileOrDirectory("sdmc:/config/edizon/wallpaper.rgba"))
+            WALLPAPER_PATH = "sdmc:/config/edizon/wallpaper.rgba"; // Overrride wallpaper path (optional)
+
+
+        tsl::initializeThemeVars(); // for ultrahand themes
+        tsl::initializeUltrahandSettings(); // for opaque screenshots and swipe to open
     } 
 
     virtual void exitServices() override {
-        if(edz::cheat::CheatManager::isCheatServiceAvailable())
+        if (edz::cheat::CheatManager::isCheatServiceAvailable())
             edz::cheat::CheatManager::exit();
-        tsExit();
+
         wlaninfExit();
         nifmExit();
         clkrstExit();
         pcvExit();
+
+        socketExit();
+        nifmExit();
+        i2cExit();
+        smExit();
+        spsmExit();
+        splExit();
+        fsdevUnmountAll();
     }
 
     virtual void onShow() override {
-        edz::cheat::CheatManager::reload();
-        GuiMain::s_runningTitleIDString     = formatString("%016lX", edz::cheat::CheatManager::getTitleID());
-        GuiMain::s_runningBuildIDString     = formatString("%016lX", edz::cheat::CheatManager::getBuildID());
-        GuiMain::s_runningProcessIDString   = formatString("%lu", edz::cheat::CheatManager::getProcessID());
+        reloadCheatManager();
     }
 
     std::unique_ptr<tsl::Gui> loadInitialGui() override {

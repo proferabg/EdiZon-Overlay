@@ -350,7 +350,7 @@ public:
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
             renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::defaultTextColor));
-            renderer->drawString("v1.0.8", false, 20, 70, 15, renderer->a(tsl::versionTextColor));
+            renderer->drawString(APP_VERSION, false, 20, 70, 15, renderer->a(tsl::versionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
                 renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));

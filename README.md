@@ -1,4 +1,4 @@
-# EdiZon-Overlay [![Github All Releases](https://img.shields.io/github/downloads/proferabg/EdiZon-Overlay/total.svg)]()
+# EdiZon-Overlay [![Github All Releases](https://img.shields.io/github/downloads/ppkantorski/EdiZon-Overlay/total.svg)]()
 
 Originally by [@WerWolv](https://www.github.com/WerWolv)
 

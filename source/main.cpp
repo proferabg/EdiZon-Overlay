@@ -87,10 +87,6 @@ public:
                         //create submenu button
                         auto cheatsSubmenu = new tsl::elm::ListItem(name);
                         cheatsSubmenu->setClickListener([name = name](s64 keys) {
-                            if (simulatedSelect) {
-                                keys |= KEY_A;
-                                simulatedSelect = false;
-                            }
                             if (keys & KEY_A) {
                                 tsl::changeTo<GuiCheats>(name);
                                 return true;
@@ -336,11 +332,6 @@ public:
         if(edz::cheat::CheatManager::isCheatServiceAvailable()){
             auto cheatsItem = new tsl::elm::ListItem("Cheats");
             cheatsItem->setClickListener([](s64 keys) {
-                if (simulatedSelect) {
-                    keys |= KEY_A;
-                    simulatedSelect = false;
-                }
-
                 if (keys & KEY_A) {
                     tsl::changeTo<GuiCheats>("");
                     return true;
@@ -355,11 +346,6 @@ public:
 
         auto statsItem  = new tsl::elm::ListItem("System Information");
         statsItem->setClickListener([](s64 keys) {
-            if (simulatedSelect) {
-                keys |= KEY_A;
-                simulatedSelect = false;
-            }
-
             if (keys & KEY_A) {
                 tsl::changeTo<GuiStats>();
                 return true;

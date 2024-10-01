@@ -374,22 +374,6 @@ public:
 
     virtual void update() { }
 
-    bool handleInput(u64 keysDown, u64 keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
-    
-        // Handle the rest of the input only if the game is not paused and not over
-        if (simulatedBack) {
-            keysDown |= KEY_B;
-            simulatedBack = false;
-        }
-
-         // Allow closing the overlay with KEY_B only when paused or game over
-        if (keysDown & KEY_B) {
-            tsl::goBack();
-        }
-        
-        return false;
-    }
-
 public:
     static inline std::string s_runningTitleIDString;
     static inline std::string s_runningProcessIDString;

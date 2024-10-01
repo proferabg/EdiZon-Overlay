@@ -393,17 +393,7 @@ public:
         }
         clkrstInitialize();
         pcvInitialize();
-
-
-        fsdevMountSdmc();
-        splInitialize();
-        spsmInitialize();
-        i2cInitialize();
-        ASSERT_FATAL(socketInitializeDefault());
-        ASSERT_FATAL(nifmInitialize(NifmServiceType_User));
-        ASSERT_FATAL(smInitialize());
-
-
+        
 
         if (isFileOrDirectory("sdmc:/config/edizon/theme.ini"))
             THEME_CONFIG_INI_PATH = "sdmc:/config/edizon/theme.ini"; // Override theme path (optional)
@@ -424,13 +414,7 @@ public:
         clkrstExit();
         pcvExit();
 
-        socketExit();
-        nifmExit();
-        i2cExit();
-        smExit();
-        spsmExit();
-        splExit();
-        fsdevUnmountAll();
+
     }
 
     virtual void onShow() override {

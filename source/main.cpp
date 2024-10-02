@@ -414,7 +414,6 @@ public:
         GuiMain::s_runningTitleIDString     = formatString("%016lX", edz::cheat::CheatManager::getTitleID());
         GuiMain::s_runningBuildIDString     = formatString("%016lX", edz::cheat::CheatManager::getBuildID());
         GuiMain::s_runningProcessIDString   = formatString("%lu", edz::cheat::CheatManager::getProcessID());
-        reloadCheatManager();
     }
 
     std::unique_ptr<tsl::Gui> loadInitialGui() override {

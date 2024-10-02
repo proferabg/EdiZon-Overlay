@@ -20,9 +20,6 @@
 #include "cheat.hpp"
 
 #include <cstring>
-#include <thread>
-#include <vector>
-#include <future>
 
 namespace edz::cheat {
 
@@ -338,163 +335,60 @@ namespace edz::cheat {
         return dmntchtWriteCheatProcessMemory(address, buffer, bufferSize);
     }
 
-        
-            
     Result CheatManager::reload() {
         if (!CheatManager::isCheatServiceAvailable())
             return ResultEdzCheatServiceNotAvailable;
-    
+
         Result res;
-    
-        // Check if we can attach to a running process (i.e., if a game is running)
-        if (R_FAILED(res = CheatManager::forceAttach())) {
-            return res;  // Early exit if no game is running
-        }
-    
-        int numThreads = 4;  // Number of threads to use for parallel processing
-        std::vector<std::future<void>> futures;
-    
-        // Step 1: Parallel deletion of local cheats
-        if (!CheatManager::s_cheats.empty()) {
-            int cheatSize = CheatManager::s_cheats.size();
-            int cheatChunkSize = (cheatSize + numThreads - 1) / numThreads;
-            futures.reserve(numThreads);
-    
-            for (int t = 0; t < numThreads; ++t) {
-                futures.emplace_back(std::async(std::launch::async, [t, cheatChunkSize, cheatSize]() {
-                    int start = t * cheatChunkSize;
-                    int end = std::min(start + cheatChunkSize, cheatSize);
-                    for (int i = start; i < end; ++i) {
-                        delete CheatManager::s_cheats[i];
-                    }
-                }));
-            }
-    
-            for (auto& future : futures) {
-                future.get();  // Wait for all threads to finish
-            }
-    
-            CheatManager::s_cheats.clear();
-        }
-    
-        // Step 2: Parallel deletion of local frozen addresses
-        if (!CheatManager::s_frozenAddresses.empty()) {
-            int frozenSize = CheatManager::s_frozenAddresses.size();
-            int frozenChunkSize = (frozenSize + numThreads - 1) / numThreads;
-            futures.clear();  // Clear the futures before reusing them
-    
-            for (int t = 0; t < numThreads; ++t) {
-                futures.emplace_back(std::async(std::launch::async, [t, frozenChunkSize, frozenSize]() {
-                    int start = t * frozenChunkSize;
-                    int end = std::min(start + frozenChunkSize, frozenSize);
-                    for (int i = start; i < end; ++i) {
-                        delete CheatManager::s_frozenAddresses[i];
-                    }
-                }));
-            }
-    
-            for (auto& future : futures) {
-                future.get();  // Wait for all threads to finish
-            }
-    
-            CheatManager::s_frozenAddresses.clear();
-        }
-    
-        // Step 3: Get process metadata
-        if (R_FAILED(res = dmntchtGetCheatProcessMetadata(&CheatManager::s_processMetadata))) {
-            // Early exit if no game is running (since we won't have any metadata)
+
+        if (R_FAILED(res = CheatManager::forceAttach()))
             return res;
-        }
-    
-        // Step 4: Load cheats with parallelized processing
+
+        // Delete local cheats copy if there are any
+        for (auto &cheat : CheatManager::s_cheats)
+            delete cheat;
+        CheatManager::s_cheats.clear();
+
+        // Delete local frozen addresses copy if there are any
+        for (auto &frozenAddress : CheatManager::s_frozenAddresses)
+            delete frozenAddress;
+        CheatManager::s_frozenAddresses.clear();
+
+        // Get process metadata
+        if (res = dmntchtGetCheatProcessMetadata(&CheatManager::s_processMetadata); !Succeeded(res))
+            return res;
+
+
+        // Get all loaded cheats
         u64 cheatCnt = 0;
-        if (R_FAILED(res = dmntchtGetCheatCount(&cheatCnt))) {
-            // If no cheats are available, skip the processing
+        if (res = dmntchtGetCheatCount(&cheatCnt); !Succeeded(res))
             return res;
-        }
-    
-        if (cheatCnt > 0) {
-            DmntCheatEntry* cheatEntries = new DmntCheatEntry[cheatCnt];
-            if (R_FAILED(res = dmntchtGetCheats(cheatEntries, cheatCnt, 0, &cheatCnt))) {
-                delete[] cheatEntries;
-                return res;
-            }
-    
-            CheatManager::s_cheats.reserve(cheatCnt);  // Reserve capacity
-    
-            int cheatChunkSizeNew = (cheatCnt + numThreads - 1) / numThreads;
-            std::vector<std::vector<Cheat*>> localCheats(numThreads);  // Local storage to avoid contention
-            futures.clear();  // Clear futures before using them again
-    
-            for (int t = 0; t < numThreads; ++t) {
-                localCheats[t].reserve(cheatChunkSizeNew);  // Reserve the local storage
-                futures.emplace_back(std::async(std::launch::async, [t, cheatChunkSizeNew, cheatEntries, cheatCnt, &localCheats]() {
-                    int start = t * cheatChunkSizeNew;
-                    int end = std::min(start + cheatChunkSizeNew, (int)cheatCnt);
-                    for (int i = start; i < end; ++i) {
-                        localCheats[t].push_back(new Cheat(cheatEntries[i]));
-                    }
-                }));
-            }
-    
-            for (auto& future : futures) {
-                future.get();  // Wait for all threads to finish
-            }
-    
-            // Merge the local cheats back into the main vector
-            for (int t = 0; t < numThreads; ++t) {
-                CheatManager::s_cheats.insert(CheatManager::s_cheats.end(), localCheats[t].begin(), localCheats[t].end());
-            }
-    
-            delete[] cheatEntries;
-        }
-    
-        // Step 6: Load frozen addresses with parallelized processing
+
+        DmntCheatEntry *cheatEntries = new DmntCheatEntry[cheatCnt];
+
+        if (res = dmntchtGetCheats(cheatEntries, cheatCnt, 0, &cheatCnt); !Succeeded(res))
+            return res;
+        
+        CheatManager::s_cheats.reserve(cheatCnt);
+        for (u32 i = 0; i < cheatCnt; i++)
+            CheatManager::s_cheats.push_back(new Cheat(cheatEntries[i]));
+
+
+        // Get all frozen addresses
         u64 frozenAddressCnt = 0;
-        if (R_FAILED(res = dmntchtGetFrozenAddressCount(&frozenAddressCnt))) {
+        if (res = dmntchtGetFrozenAddressCount(&frozenAddressCnt); !Succeeded(res))
             return res;
-        }
-    
-        if (frozenAddressCnt > 0) {
-            DmntFrozenAddressEntry* frozenAddressEntries = new DmntFrozenAddressEntry[frozenAddressCnt];
-            if (R_FAILED(res = dmntchtGetFrozenAddresses(frozenAddressEntries, frozenAddressCnt, 0, &frozenAddressCnt))) {
-                delete[] frozenAddressEntries;
-                return res;
-            }
-    
-            CheatManager::s_frozenAddresses.reserve(frozenAddressCnt);  // Reserve capacity
-    
-            int frozenChunkSizeNew = (frozenAddressCnt + numThreads - 1) / numThreads;
-            std::vector<std::vector<FrozenAddress*>> localFrozenAddresses(numThreads);  // Local storage for frozen addresses
-            futures.clear();  // Reuse futures for frozen address loading
-    
-            for (int t = 0; t < numThreads; ++t) {
-                localFrozenAddresses[t].reserve(frozenChunkSizeNew);  // Reserve the local storage
-                futures.emplace_back(std::async(std::launch::async, [t, frozenChunkSizeNew, frozenAddressEntries, frozenAddressCnt, &localFrozenAddresses]() {
-                    int start = t * frozenChunkSizeNew;
-                    int end = std::min(start + frozenChunkSizeNew, (int)frozenAddressCnt);
-                    for (int i = start; i < end; ++i) {
-                        localFrozenAddresses[t].push_back(new FrozenAddress(frozenAddressEntries[i]));
-                    }
-                }));
-            }
-    
-            for (auto& future : futures) {
-                future.get();  // Wait for all threads to finish
-            }
-    
-            // Merge the local frozen addresses back into the main vector
-            for (int t = 0; t < numThreads; ++t) {
-                CheatManager::s_frozenAddresses.insert(CheatManager::s_frozenAddresses.end(), localFrozenAddresses[t].begin(), localFrozenAddresses[t].end());
-            }
-    
-            delete[] frozenAddressEntries;
-        }
-    
+
+        DmntFrozenAddressEntry frozenAddressEntries[frozenAddressCnt];
+        
+        if (res = dmntchtGetFrozenAddresses(frozenAddressEntries, frozenAddressCnt, 0, &frozenAddressCnt); !Succeeded(res))
+            return res;
+
+        CheatManager::s_frozenAddresses.reserve(frozenAddressCnt);
+        for (auto &frozenAddressEntry : frozenAddressEntries)
+            CheatManager::s_frozenAddresses.push_back(new FrozenAddress(frozenAddressEntry));
+
         return res;
     }
-    
-    
-        
 
 }

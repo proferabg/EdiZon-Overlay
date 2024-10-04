@@ -207,7 +207,7 @@ public:
 
             renderer->drawRect(x, 303, w, 1, renderer->a(tsl::style::color::ColorFrame));
             renderer->drawString("Local IP:", false, 45, 330, 18, renderer->a(tsl::style::color::ColorText));
-            
+
 
             // Draw temperatures and battery percentage
             static char PCB_temperatureStr[10];
@@ -296,12 +296,12 @@ public:
     GuiMain() { }
 
     ~GuiMain() { }
-
+    
     virtual tsl::elm::Element* createUI() {
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::defaultTextColor));
-            renderer->drawString(APP_VERSION, false, 20, 70, 15, renderer->a(tsl::versionTextColor));
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultTextColor));
+            renderer->drawString(APP_VERSION, false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
                 renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));

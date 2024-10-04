@@ -22,9 +22,9 @@ APP_VERSION		:=	v1.0.9
 TARGET			:=	EdiZon
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES_TOP		:=	source libs/libultra/source libs/libtesla/source
+SOURCES_TOP		:=	source libs/libultrahand/libultra/source libs/libultrahand/libtesla/source
 SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
-INCLUDES		:=	include libs/libultra/include libs/libtesla/include libs/EdiZon-SE/include
+INCLUDES		:=	include libs/libultrahand/libultra/include libs/libultrahand/libtesla/include libs/EdiZon-SE/include
 #EXCLUDES		:=  dmntcht.c
 DATA			:=	data
 #---------------------------------------------------------------------------------

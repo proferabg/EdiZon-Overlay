@@ -207,21 +207,7 @@ public:
 
             renderer->drawRect(x, 303, w, 1, renderer->a(tsl::style::color::ColorFrame));
             renderer->drawString("Local IP:", false, 45, 330, 18, renderer->a(tsl::style::color::ColorText));
-
-            //float socTemperature = 0, pcbTemperature = 0;
-            //if(hosversionAtLeast(10,0,0)){
-            //  TsSession ts_session;
-            //  Result rc = tsOpenSession(&ts_session, TsDeviceCode_LocationExternal);
-            //  if (R_SUCCEEDED(rc)) {
-            //    tsSessionGetTemperature(&ts_session, &socTemperature);
-            //    tsSessionClose(&ts_session);
-            //  }
-            //  rc = tsOpenSession(&ts_session, TsDeviceCode_LocationInternal);
-            //  if (R_SUCCEEDED(rc)) {
-            //    tsSessionGetTemperature(&ts_session, &pcbTemperature);
-            //    tsSessionClose(&ts_session);
-            //  }
-            //}
+            
 
             // Draw temperatures and battery percentage
             static char PCB_temperatureStr[10];
@@ -386,26 +372,23 @@ public:
         clkrstInitialize();
         pcvInitialize();
         
+        i2cInitialize();
 
         if (isFileOrDirectory("sdmc:/config/edizon/theme.ini"))
             THEME_CONFIG_INI_PATH = "sdmc:/config/edizon/theme.ini"; // Override theme path (optional)
         if (isFileOrDirectory("sdmc:/config/edizon/wallpaper.rgba"))
             WALLPAPER_PATH = "sdmc:/config/edizon/wallpaper.rgba"; // Overrride wallpaper path (optional)
-
-
-        tsl::initializeThemeVars(); // for ultrahand themes
-        tsl::initializeUltrahandSettings(); // for opaque screenshots and swipe to open
     } 
 
     virtual void exitServices() override {
         if (edz::cheat::CheatManager::isCheatServiceAvailable())
             edz::cheat::CheatManager::exit();
 
+        i2cExit();
         wlaninfExit();
         nifmExit();
         clkrstExit();
         pcvExit();
-
 
     }
 

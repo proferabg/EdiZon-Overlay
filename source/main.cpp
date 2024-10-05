@@ -54,12 +54,12 @@ public:
             renderer->drawString(APP_VERSION, false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
-                renderer->drawString("Program ID:", false, 150 +14, 40 -7, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Build ID:", false, 150 +14, 60 -7, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Process ID:", false, 150 +14, 80 -7, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
             }
         }));
 
@@ -119,12 +119,12 @@ public:
             renderer->drawString("Cheats", false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
-                renderer->drawString("Program ID:", false, 150 +14, 40 -7, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Build ID:", false, 150 +14, 60 -7, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Process ID:", false, 150 +14, 80 -7, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
             }
         }));
 

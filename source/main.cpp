@@ -37,6 +37,72 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
+class GuiCheats;
+
+class GuiStats;
+
+class GuiMain : public tsl::Gui {
+public:
+    GuiMain() { }
+
+    ~GuiMain() { }
+
+    virtual tsl::elm::Element* createUI() {
+        auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
+        rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultTextColor));
+            renderer->drawString(APP_VERSION, false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
+
+            if (edz::cheat::CheatManager::getProcessID() != 0) {
+                renderer->drawString("Program ID:", false, 150 +14, 40 -7, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Build ID:", false, 150 +14, 60 -7, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Process ID:", false, 150 +14, 80 -7, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
+            }
+        }));
+
+        auto list = new tsl::elm::List();
+
+        if(edz::cheat::CheatManager::isCheatServiceAvailable()){
+            auto cheatsItem = new tsl::elm::ListItem("Cheats");
+            cheatsItem->setClickListener([](s64 keys) {
+                if (keys & KEY_A) {
+                    tsl::changeTo<GuiCheats>("");
+                    return true;
+                }
+                return false;
+            });
+            list->addItem(cheatsItem);
+        } else {
+            auto noDmntSvc = new tsl::elm::ListItem("Cheat Service Unavailable!");
+            list->addItem(noDmntSvc);
+        }
+
+        auto statsItem  = new tsl::elm::ListItem("System Information");
+        statsItem->setClickListener([](s64 keys) {
+            if (keys & KEY_A) {
+                tsl::changeTo<GuiStats>();
+                return true;
+            }
+            return false;
+        });
+        list->addItem(statsItem);
+
+        rootFrame->setContent(list);
+        return rootFrame;
+    }
+
+    virtual void update() { }
+
+public:
+    static inline std::string s_runningTitleIDString;
+    static inline std::string s_runningProcessIDString;
+    static inline std::string s_runningBuildIDString;
+    static inline bool b_firstRun = true;
+};
+
 
 class GuiCheats : public tsl::Gui {
 public:
@@ -46,7 +112,21 @@ public:
     ~GuiCheats() { }
 
     virtual tsl::elm::Element* createUI() override {
-        auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "Cheats");
+        auto rootFrame = new tsl::elm::HeaderOverlayFrame(97);
+
+        rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultTextColor));
+            renderer->drawString("Cheats", false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
+
+            if (edz::cheat::CheatManager::getProcessID() != 0) {
+                renderer->drawString("Program ID:", false, 150 +14, 40 -7, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Build ID:", false, 150 +14, 60 -7, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Process ID:", false, 150 +14, 80 -7, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -7, 15, renderer->a(tsl::style::color::ColorHighlight));
+            }
+        }));
 
         if (edz::cheat::CheatManager::getCheats().size() == 0) {
             auto warning = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
@@ -196,7 +276,9 @@ public:
     virtual tsl::elm::Element* createUI() override {
         auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "System Information");
 
+
         auto infos = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
+
             renderer->drawString("CPU Temperature:", false, 45, 160, 18, renderer->a(tsl::style::color::ColorText));
             renderer->drawString("PCB Temperature:", false, 45, 190, 18, renderer->a(tsl::style::color::ColorText));
 
@@ -291,67 +373,6 @@ private:
 };
 
 
-class GuiMain : public tsl::Gui {
-public:
-    GuiMain() { }
-
-    ~GuiMain() { }
-    
-    virtual tsl::elm::Element* createUI() {
-        auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
-        rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultTextColor));
-            renderer->drawString(APP_VERSION, false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
-
-            if (edz::cheat::CheatManager::getProcessID() != 0) {
-                renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Build ID:", false, 150, 60, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Process ID:", false, 150, 80, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250, 40, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250, 60, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250, 80, 15, renderer->a(tsl::style::color::ColorHighlight));
-            }
-        }));
-
-        auto list = new tsl::elm::List();
-
-        if(edz::cheat::CheatManager::isCheatServiceAvailable()){
-            auto cheatsItem = new tsl::elm::ListItem("Cheats");
-            cheatsItem->setClickListener([](s64 keys) {
-                if (keys & KEY_A) {
-                    tsl::changeTo<GuiCheats>("");
-                    return true;
-                }
-                return false;
-            });
-            list->addItem(cheatsItem);
-        } else {
-            auto noDmntSvc = new tsl::elm::ListItem("Cheat Service Unavailable!");
-            list->addItem(noDmntSvc);
-        }
-
-        auto statsItem  = new tsl::elm::ListItem("System Information");
-        statsItem->setClickListener([](s64 keys) {
-            if (keys & KEY_A) {
-                tsl::changeTo<GuiStats>();
-                return true;
-            }
-            return false;
-        });
-        list->addItem(statsItem);
-
-        rootFrame->setContent(list);
-        return rootFrame;
-    }
-
-    virtual void update() { }
-
-public:
-    static inline std::string s_runningTitleIDString;
-    static inline std::string s_runningProcessIDString;
-    static inline std::string s_runningBuildIDString;
-    static inline bool b_firstRun = true;
-};
 
 
 class EdiZonOverlay : public tsl::Overlay {

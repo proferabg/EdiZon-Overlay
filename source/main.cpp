@@ -50,7 +50,7 @@ public:
     virtual tsl::elm::Element* createUI() {
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultTextColor));
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultOverlayColor));
             renderer->drawString(APP_VERSION, false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
@@ -115,7 +115,7 @@ public:
         auto rootFrame = new tsl::elm::HeaderOverlayFrame(97);
 
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultTextColor));
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultOverlayColor));
             renderer->drawString("Cheats", false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
@@ -394,11 +394,6 @@ public:
         pcvInitialize();
         
         i2cInitialize();
-
-        if (isFileOrDirectory("sdmc:/config/edizon/theme.ini"))
-            THEME_CONFIG_INI_PATH = "sdmc:/config/edizon/theme.ini"; // Override theme path (optional)
-        if (isFileOrDirectory("sdmc:/config/edizon/wallpaper.rgba"))
-            WALLPAPER_PATH = "sdmc:/config/edizon/wallpaper.rgba"; // Overrride wallpaper path (optional)
     } 
 
     virtual void exitServices() override {

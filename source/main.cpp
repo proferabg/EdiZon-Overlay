@@ -394,12 +394,13 @@ public:
         pcvInitialize();
         
         i2cInitialize();
+        nifmInitialize(NifmServiceType_User);
     } 
 
     virtual void exitServices() override {
         if (edz::cheat::CheatManager::isCheatServiceAvailable())
             edz::cheat::CheatManager::exit();
-
+        nifmExit();
         i2cExit();
         wlaninfExit();
         nifmExit();

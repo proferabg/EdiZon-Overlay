@@ -1,8 +1,8 @@
-# EdiZon-Overlay [![Github All Releases](https://img.shields.io/github/downloads/ppkantorski/EdiZon-Overlay/total.svg)]()
+# EdiZon-Overlay [![Github All Releases](https://img.shields.io/github/downloads/proferabg/EdiZon-Overlay/total.svg)]()
 
 Originally by [@WerWolv](https://www.github.com/WerWolv)
 
-Continued Support by ppkantorski
+Continued Support by proferabg & ppkantorski
 <br />
 <br />
 
@@ -14,18 +14,6 @@ Continued Support by ppkantorski
     Faster opening / game detection.
     Fix for local IP calls.
     Temperature readings are now done through i2c.
-<br />
-
-
-Continued Support by proferabg
-<br />
-<br />
-
-# Latest Changelog - v1.0.8
-
-    Updated libnx
-    Fixed temperature rendering
-    Added Enabling Cheats by Default on Overlay Open
 <br />
 
 # How To Use Submenus

@@ -25,7 +25,6 @@
 #include <string.h>
 
 #include <switch.h>
-#include <filesystem>
 
 #include <switch/nro.h>
 #include <switch/nacp.h>
@@ -38,6 +37,72 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
+class GuiCheats;
+
+class GuiStats;
+
+class GuiMain : public tsl::Gui {
+public:
+    GuiMain() { }
+
+    ~GuiMain() { }
+
+    virtual tsl::elm::Element* createUI() {
+        auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
+        rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultOverlayColor));
+            renderer->drawString(APP_VERSION, false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
+
+            if (edz::cheat::CheatManager::getProcessID() != 0) {
+                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+            }
+        }));
+
+        auto list = new tsl::elm::List();
+
+        if(edz::cheat::CheatManager::isCheatServiceAvailable()){
+            auto cheatsItem = new tsl::elm::ListItem("Cheats");
+            cheatsItem->setClickListener([](s64 keys) {
+                if (keys & KEY_A) {
+                    tsl::changeTo<GuiCheats>("");
+                    return true;
+                }
+                return false;
+            });
+            list->addItem(cheatsItem);
+        } else {
+            auto noDmntSvc = new tsl::elm::ListItem("Cheat Service Unavailable!");
+            list->addItem(noDmntSvc);
+        }
+
+        auto statsItem  = new tsl::elm::ListItem("System Information");
+        statsItem->setClickListener([](s64 keys) {
+            if (keys & KEY_A) {
+                tsl::changeTo<GuiStats>();
+                return true;
+            }
+            return false;
+        });
+        list->addItem(statsItem);
+
+        rootFrame->setContent(list);
+        return rootFrame;
+    }
+
+    virtual void update() { }
+
+public:
+    static inline std::string s_runningTitleIDString;
+    static inline std::string s_runningProcessIDString;
+    static inline std::string s_runningBuildIDString;
+    static inline bool b_firstRun = true;
+};
+
 
 class GuiCheats : public tsl::Gui {
 public:
@@ -47,7 +112,21 @@ public:
     ~GuiCheats() { }
 
     virtual tsl::elm::Element* createUI() override {
-        auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "Cheats");
+        auto rootFrame = new tsl::elm::HeaderOverlayFrame(97);
+
+        rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultOverlayColor));
+            renderer->drawString("Cheats", false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
+
+            if (edz::cheat::CheatManager::getProcessID() != 0) {
+                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+            }
+        }));
 
         if (edz::cheat::CheatManager::getCheats().size() == 0) {
             auto warning = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
@@ -88,7 +167,7 @@ public:
                         //create submenu button
                         auto cheatsSubmenu = new tsl::elm::ListItem(name);
                         cheatsSubmenu->setClickListener([name = name](s64 keys) {
-                            if (keys & HidNpadButton_A) {
+                            if (keys & KEY_A) {
                                 tsl::changeTo<GuiCheats>(name);
                                 return true;
                             }
@@ -181,7 +260,7 @@ public:
         }
 
         tsl::hlp::doWithSmSession([this]{
-            this->m_ipAddress = gethostid();
+            nifmGetCurrentIpAddress(&this->m_ipAddress);
             this->m_ipAddressString = formatString("%d.%d.%d.%d", this->m_ipAddress & 0xFF, (this->m_ipAddress >> 8) & 0xFF, (this->m_ipAddress >> 16) & 0xFF, (this->m_ipAddress >> 24) & 0xFF);
         });
 
@@ -197,9 +276,11 @@ public:
     virtual tsl::elm::Element* createUI() override {
         auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "System Information");
 
+
         auto infos = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
-            renderer->drawString("CPU Temparature:", false, 45, 160, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("PCB Temparature:", false, 45, 190, 18, renderer->a(tsl::style::color::ColorText));
+
+            renderer->drawString("CPU Temperature:", false, 45, 160, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("PCB Temperature:", false, 45, 190, 18, renderer->a(tsl::style::color::ColorText));
 
             renderer->drawRect(x, 203, w, 1, renderer->a(tsl::style::color::ColorFrame));
             renderer->drawString("CPU Clock:", false, 45, 230, 18, renderer->a(tsl::style::color::ColorText));
@@ -209,22 +290,21 @@ public:
             renderer->drawRect(x, 303, w, 1, renderer->a(tsl::style::color::ColorFrame));
             renderer->drawString("Local IP:", false, 45, 330, 18, renderer->a(tsl::style::color::ColorText));
 
-            float socTemperature = 0, pcbTemperature = 0;
-            if(hosversionAtLeast(10,0,0)){
-              TsSession ts_session;
-              Result rc = tsOpenSession(&ts_session, TsDeviceCode_LocationExternal);
-              if (R_SUCCEEDED(rc)) {
-                tsSessionGetTemperature(&ts_session, &socTemperature);
-                tsSessionClose(&ts_session);
-              }
-              rc = tsOpenSession(&ts_session, TsDeviceCode_LocationInternal);
-              if (R_SUCCEEDED(rc)) {
-                tsSessionGetTemperature(&ts_session, &pcbTemperature);
-                tsSessionClose(&ts_session);
-              }
-            }
-            renderer->drawString(formatString("%.1f °C", socTemperature).c_str(), false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));
-            renderer->drawString(formatString("%.1f °C", pcbTemperature).c_str(), false, 240, 190, 18, renderer->a(tsl::style::color::ColorHighlight));
+
+            // Draw temperatures and battery percentage
+            static char PCB_temperatureStr[10];
+            static char SOC_temperatureStr[10];
+            
+
+            ReadSocTemperature(&SOC_temperature, false);
+            ReadPcbTemperature(&PCB_temperature, false);
+
+            snprintf(SOC_temperatureStr, sizeof(SOC_temperatureStr) - 1, "%.1f °C", static_cast<double>(SOC_temperature));
+            snprintf(PCB_temperatureStr, sizeof(PCB_temperatureStr) - 1, "%.1f °C", static_cast<double>(PCB_temperature));
+            
+
+            renderer->drawString(SOC_temperatureStr, false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(PCB_temperatureStr, false, 240, 190, 18, renderer->a(tsl::style::color::ColorHighlight));
             
 
             u32 cpuClock = 0, gpuClock = 0, memClock = 0;
@@ -243,7 +323,7 @@ public:
             renderer->drawString(formatString("%.01f MHz", gpuClock / 1'000'000.0F).c_str(), false, 240, 260, 18, renderer->a(tsl::style::color::ColorHighlight));
             renderer->drawString(formatString("%.01f MHz", memClock / 1'000'000.0F).c_str(), false, 240, 290, 18, renderer->a(tsl::style::color::ColorHighlight));
 
-            if (this->m_ipAddress == INADDR_LOOPBACK)
+            if (this->m_ipAddressString ==  "0.0.0.0")
                 renderer->drawString("Offline", false, 240, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
             else 
                 renderer->drawString(this->m_ipAddressString.c_str(), false, 240, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
@@ -288,71 +368,12 @@ public:
 
 private:
     ClkrstSession m_clkrstSessionCpu, m_clkrstSessionGpu, m_clkrstSessionMem;
-    long m_ipAddress;
+    u32 m_ipAddress;
     std::string m_ipAddressString;
 };
 
-class GuiMain : public tsl::Gui {
-public:
-    GuiMain() { }
 
-    ~GuiMain() { }
 
-    virtual tsl::elm::Element* createUI() {
-        auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
-        rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50, 30, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("v1.0.8", false, 20, 70, 15, renderer->a(tsl::style::color::ColorDescription));
-
-            if (edz::cheat::CheatManager::getProcessID() != 0) {
-                renderer->drawString("Program ID:", false, 150, 40, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Build ID:", false, 150, 60, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Process ID:", false, 150, 80, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250, 40, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250, 60, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250, 80, 15, renderer->a(tsl::style::color::ColorHighlight));
-            }
-        }));
-
-        auto list = new tsl::elm::List();
-
-        if(edz::cheat::CheatManager::isCheatServiceAvailable()){
-            auto cheatsItem = new tsl::elm::ListItem("Cheats");
-            cheatsItem->setClickListener([](s64 keys) {
-                if (keys & HidNpadButton_A) {
-                    tsl::changeTo<GuiCheats>("");
-                    return true;
-                }
-                return false;
-            });
-            list->addItem(cheatsItem);
-        } else {
-            auto noDmntSvc = new tsl::elm::ListItem("Cheat Service Unavailable!");
-            list->addItem(noDmntSvc);
-        }
-
-        auto statsItem  = new tsl::elm::ListItem("System Information");
-        statsItem->setClickListener([](s64 keys) {
-            if (keys & HidNpadButton_A) {
-                tsl::changeTo<GuiStats>();
-                return true;
-            }
-            return false;
-        });
-        list->addItem(statsItem);
-
-        rootFrame->setContent(list);
-        return rootFrame;
-    }
-
-    virtual void update() { }
-
-public:
-    static inline std::string s_runningTitleIDString;
-    static inline std::string s_runningProcessIDString;
-    static inline std::string s_runningBuildIDString;
-    static inline bool b_firstRun = true;
-};
 
 class EdiZonOverlay : public tsl::Overlay {
 public:
@@ -369,24 +390,23 @@ public:
                 }
             }
         }
-        tsInitialize();
-        if (hosversionAtLeast(15,0,0)) {
-            nifmInitialize(NifmServiceType_User);
-        } else {
-            wlaninfInitialize();
-        }
         clkrstInitialize();
         pcvInitialize();
+        
+        i2cInitialize();
+        nifmInitialize(NifmServiceType_User);
     } 
 
     virtual void exitServices() override {
-        if(edz::cheat::CheatManager::isCheatServiceAvailable())
+        if (edz::cheat::CheatManager::isCheatServiceAvailable())
             edz::cheat::CheatManager::exit();
-        tsExit();
+        nifmExit();
+        i2cExit();
         wlaninfExit();
         nifmExit();
         clkrstExit();
         pcvExit();
+
     }
 
     virtual void onShow() override {

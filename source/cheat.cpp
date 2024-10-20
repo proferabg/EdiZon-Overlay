@@ -175,7 +175,6 @@ namespace edz::cheat {
             if (R_SUCCEEDED(pmdmntGetApplicationProcessId(&PID))) {
                 return dmntchtForceOpenCheatProcess();
             }
-            svcSleepThread(100'000'000);
         }
         return ResultEdzAttachFailed;
     }
@@ -335,7 +334,6 @@ namespace edz::cheat {
 
         return dmntchtWriteCheatProcessMemory(address, buffer, bufferSize);
     }
-
 
     Result CheatManager::reload() {
         if (!CheatManager::isCheatServiceAvailable())

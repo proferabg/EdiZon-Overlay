@@ -16,40 +16,51 @@ else
 endif
 
 APP_TITLE		:=	EdiZon
-APP_AUTHOR		:=	WerWolv & proferabg
-APP_VERSION		:=	v1.0.8
+APP_AUTHOR		:=	WerWolv & proferabg & ppkantorski
+APP_VERSION		:=	v1.0.9
 
 TARGET			:=	EdiZon
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES_TOP		:=	source libs/libtesla/source
+SOURCES_TOP		:=	source libs/libultrahand/libultra/source libs/libultrahand/libtesla/source
 SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
-INCLUDES		:=	include libs/EdiZon-SE/include libs/libtesla/include 
+INCLUDES		:=	include libs/libultrahand/libultra/include libs/libultrahand/libtesla/include libs/EdiZon-SE/include
 #EXCLUDES		:=  dmntcht.c
 DATA			:=	data
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-null      	:=
-SPACE     	:=  $(null) $(null)
+ARCH := -march=armv8-a+simd+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
-ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
+CFLAGS := -Wall -Os -ffunction-sections -fdata-sections -flto\
+			$(ARCH) $(DEFINES)
 
-CFLAGS	:=	-g -Wall -O3 -ffunction-sections \
-			$(ARCH) $(DEFINES) \
-			-DVERSION_MAJOR=${VERSION_MAJOR} \
-			-DVERSION_MINOR=${VERSION_MINOR} \
-			-DVERSION_MICRO=${VERSION_MICRO} \
-			-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
-      
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations
+CFLAGS += $(INCLUDE) -D__SWITCH__ -DAPP_VERSION="\"$(APP_VERSION)\"" -D_FORTIFY_SOURCE=2
+CFLAGS	+= -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations
 
-CXXFLAGS	:= $(CFLAGS) -fexceptions -std=gnu++20
+# Enable appearance overriding
+UI_OVERRIDE_PATH := /config/edizon/
+CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
 
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+# Disable fstream
+NO_FSTREAM_DIRECTIVE := 1
+CFLAGS += -DNO_FSTREAM_DIRECTIVE=$(NO_FSTREAM_DIRECTIVE)
 
-LIBS	:= -lnx
+CXXFLAGS := $(CFLAGS) -std=c++20 -Wno-dangling-else -ffast-math
+
+ASFLAGS := $(ARCH)
+LDFLAGS += -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
+
+LIBS := -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx
+
+CXXFLAGS += -fno-exceptions -ffunction-sections -fdata-sections -fno-rtti
+LDFLAGS += -Wl,--gc-sections -Wl,--as-needed
+
+# For Ensuring Parallel LTRANS Jobs w/ GCC, make -j6
+CXXFLAGS += -flto -fuse-linker-plugin -flto=6
+LDFLAGS += -flto=6
+
+
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

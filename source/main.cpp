@@ -296,11 +296,11 @@ public:
             static char SOC_temperatureStr[10];
             
 
-            ReadSocTemperature(&SOC_temperature, false);
-            ReadPcbTemperature(&PCB_temperature, false);
+            ult::ReadSocTemperature(&ult::SOC_temperature, false);
+            ult::ReadPcbTemperature(&ult::PCB_temperature, false);
 
-            snprintf(SOC_temperatureStr, sizeof(SOC_temperatureStr) - 1, "%.1f °C", static_cast<double>(SOC_temperature));
-            snprintf(PCB_temperatureStr, sizeof(PCB_temperatureStr) - 1, "%.1f °C", static_cast<double>(PCB_temperature));
+            snprintf(SOC_temperatureStr, sizeof(SOC_temperatureStr) - 1, "%.1f °C", static_cast<double>(ult::SOC_temperature));
+            snprintf(PCB_temperatureStr, sizeof(PCB_temperatureStr) - 1, "%.1f °C", static_cast<double>(ult::PCB_temperature));
             
 
             renderer->drawString(SOC_temperatureStr, false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));

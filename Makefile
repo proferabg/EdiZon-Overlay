@@ -24,7 +24,7 @@ OUTDIR			:=	out
 BUILD			:=	build
 SOURCES_TOP		:=	source libs/libultrahand/libultra/source libs/libultrahand/libtesla/source
 SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
-INCLUDES		:=	include libs/libultrahand/libultra/include libs/libultrahand/libtesla/include libs/EdiZon-SE/include
+INCLUDES		:=	include libs/libultrahand/libultra/include libs/libultrahand/libtesla/include
 #EXCLUDES		:=  dmntcht.c
 DATA			:=	data
 #---------------------------------------------------------------------------------

@@ -29,8 +29,6 @@
 #include <switch/nro.h>
 #include <switch/nacp.h>
 
-#include <edizon.h>
-#include <helpers/util.h>
 #include "utils.hpp"
 #include "cheat.hpp"
 

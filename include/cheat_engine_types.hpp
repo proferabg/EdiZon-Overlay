@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <edizon.h>
-
 #include <cstring>
 #include <vector>
 

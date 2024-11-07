@@ -160,9 +160,16 @@ namespace edz::cheat {
 
     bool CheatManager::isCheatServiceAvailable() {
         static s8 running = -1;
-        if (running == -1) 
-            running = isServiceRunning("dmnt:cht");
+        if (running == -1){
+            Handle handle;
+            SmServiceName service_name = smEncodeName("dmnt:cht");
+            bool running = R_FAILED(smRegisterService(&handle, service_name, false, 1));
 
+            svcCloseHandle(handle);
+
+            if (!running)
+                smUnregisterService(service_name);
+        }
         return !!running; 
     }
 

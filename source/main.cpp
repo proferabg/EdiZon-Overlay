@@ -128,8 +128,8 @@ public:
 
         if (edz::cheat::CheatManager::getCheats().size() == 0) {
             auto warning = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
-                renderer->drawString("\uE150", false, 180, 250, 90, renderer->a(0xFFFF));
-                renderer->drawString("No Cheats loaded!", false, 110, 340, 25, renderer->a(0xFFFF));
+                renderer->drawString("\uE150", false, 180, 274, 90, renderer->a(0xFFFF));
+                renderer->drawString("No Cheats loaded!", false, 110, 360, 25, renderer->a(0xFFFF));
             });
 
             rootFrame->setContent(warning);
@@ -270,43 +270,39 @@ public:
             clkrstCloseSession(&this->m_clkrstSessionMem);
         }
      }
-
+            
     virtual tsl::elm::Element* createUI() override {
         auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "System Information");
-
-
+    
         auto infos = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
-
-            renderer->drawString("CPU Temperature:", false, 45, 160, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("PCB Temperature:", false, 45, 190, 18, renderer->a(tsl::style::color::ColorText));
-
-            renderer->drawRect(x, 203, w, 1, renderer->a(tsl::style::color::ColorFrame));
-            renderer->drawString("CPU Clock:", false, 45, 230, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("GPU Clock:", false, 45, 260, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("MEM Clock:", false, 45, 290, 18, renderer->a(tsl::style::color::ColorText));
-
-            renderer->drawRect(x, 303, w, 1, renderer->a(tsl::style::color::ColorFrame));
-            renderer->drawString("Local IP:", false, 45, 330, 18, renderer->a(tsl::style::color::ColorText));
-
-
+    
+            renderer->drawString("CPU Temperature:", false, 63, 200, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("PCB Temperature:", false, 63, 230, 18, renderer->a(tsl::style::color::ColorText));
+    
+            renderer->drawRect(x, 243, w, 1, renderer->a(tsl::style::color::ColorFrame));
+            renderer->drawString("CPU Clock:", false, 63, 270, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("GPU Clock:", false, 63, 300, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("MEM Clock:", false, 63, 330, 18, renderer->a(tsl::style::color::ColorText));
+    
+            renderer->drawRect(x, 343, w, 1, renderer->a(tsl::style::color::ColorFrame));
+            renderer->drawString("Local IP:", false, 63, 370, 18, renderer->a(tsl::style::color::ColorText));
+    
+    
             // Draw temperatures and battery percentage
             static char PCB_temperatureStr[10];
             static char SOC_temperatureStr[10];
             
-
             ult::ReadSocTemperature(&ult::SOC_temperature, false);
             ult::ReadPcbTemperature(&ult::PCB_temperature, false);
-
+    
             snprintf(SOC_temperatureStr, sizeof(SOC_temperatureStr) - 1, "%.1f °C", static_cast<double>(ult::SOC_temperature));
             snprintf(PCB_temperatureStr, sizeof(PCB_temperatureStr) - 1, "%.1f °C", static_cast<double>(ult::PCB_temperature));
             
-
-            renderer->drawString(SOC_temperatureStr, false, 240, 160, 18, renderer->a(tsl::style::color::ColorHighlight));
-            renderer->drawString(PCB_temperatureStr, false, 240, 190, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(SOC_temperatureStr, false, 258, 200, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(PCB_temperatureStr, false, 258, 230, 18, renderer->a(tsl::style::color::ColorHighlight));
             
-
             u32 cpuClock = 0, gpuClock = 0, memClock = 0;
-
+    
             if (hosversionAtLeast(8,0,0)) {
                 clkrstGetClockRate(&this->m_clkrstSessionCpu, &cpuClock);
                 clkrstGetClockRate(&this->m_clkrstSessionGpu, &gpuClock);
@@ -316,22 +312,22 @@ public:
                 pcvGetClockRate(PcvModule_GPU, &gpuClock);
                 pcvGetClockRate(PcvModule_EMC, &memClock);
             }
-
-            renderer->drawString(formatString("%.01f MHz", cpuClock / 1'000'000.0F).c_str(), false, 240, 230, 18, renderer->a(tsl::style::color::ColorHighlight));
-            renderer->drawString(formatString("%.01f MHz", gpuClock / 1'000'000.0F).c_str(), false, 240, 260, 18, renderer->a(tsl::style::color::ColorHighlight));
-            renderer->drawString(formatString("%.01f MHz", memClock / 1'000'000.0F).c_str(), false, 240, 290, 18, renderer->a(tsl::style::color::ColorHighlight));
-
+    
+            renderer->drawString(formatString("%.01f MHz", cpuClock / 1'000'000.0F).c_str(), false, 258, 270, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(formatString("%.01f MHz", gpuClock / 1'000'000.0F).c_str(), false, 258, 300, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(formatString("%.01f MHz", memClock / 1'000'000.0F).c_str(), false, 258, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
+    
             if (this->m_ipAddressString ==  "0.0.0.0")
-                renderer->drawString("Offline", false, 240, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString("Offline", false, 258, 370, 18, renderer->a(tsl::style::color::ColorHighlight));
             else 
-                renderer->drawString(this->m_ipAddressString.c_str(), false, 240, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
-
+                renderer->drawString(this->m_ipAddressString.c_str(), false, 258, 370, 18, renderer->a(tsl::style::color::ColorHighlight));
+    
             if(hosversionAtLeast(15,0,0)){
                 NifmInternetConnectionType conType;
                 u32 wifiStrength;
                 NifmInternetConnectionStatus conStatus;
                 nifmGetInternetConnectionStatus(&conType, &wifiStrength, &conStatus);
-                renderer->drawString("Connection:", false, 45, 360, 18, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Connection:", false, 63, 400, 18, renderer->a(tsl::style::color::ColorText));
                 if(conStatus == NifmInternetConnectionStatus_Connected && conType == NifmInternetConnectionType_WiFi) {
                     std::string wifiStrengthStr = "(Strong)";
                     tsl::Color color = tsl::Color(0x0, 0xF, 0x0, 0xF);
@@ -342,23 +338,23 @@ public:
                         wifiStrengthStr = "(Poor)";
                         color = tsl::Color(0xF, 0x0, 0x0, 0xF);
                     }
-                    renderer->drawString("WiFi", false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight));
-                    renderer->drawString(wifiStrengthStr.c_str(), false, 285, 360, 18, renderer->a(color));
+                    renderer->drawString("WiFi", false, 258, 400, 18, renderer->a(tsl::style::color::ColorHighlight));
+                    renderer->drawString(wifiStrengthStr.c_str(), false, 303, 400, 18, renderer->a(color));
                 } else if(conStatus == NifmInternetConnectionStatus_Connected && conType == NifmInternetConnectionType_Ethernet){
-                    renderer->drawString("Ethernet", false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight));
+                    renderer->drawString("Ethernet", false, 258, 400, 18, renderer->a(tsl::style::color::ColorHighlight));
                 } else {
-                    renderer->drawString("Disconnected", false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight));
+                    renderer->drawString("Disconnected", false, 258, 400, 18, renderer->a(tsl::style::color::ColorHighlight));
                 }
             } else {
                 s32 signalStrength = 0;
                 wlaninfGetRSSI(&signalStrength);
-
-                renderer->drawString("WiFi Signal:", false, 45, 360, 18, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString(formatString("%d dBm", signalStrength).c_str(), false, 240, 360, 18, renderer->a(tsl::style::color::ColorHighlight)); 
+    
+                renderer->drawString("WiFi Signal:", false, 63, 400, 18, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString(formatString("%d dBm", signalStrength).c_str(), false, 258, 400, 18, renderer->a(tsl::style::color::ColorHighlight)); 
             }
         });
         rootFrame->setContent(infos);
-
+    
         return rootFrame;
     }
 

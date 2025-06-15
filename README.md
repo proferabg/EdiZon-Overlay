@@ -7,7 +7,7 @@ Continued Support by proferabg & ppkantorski
 <br />
 
 # Latest Changelog - v1.0.10
-    Updated libtesla (fixes #33)
+    Updated libultrahand (fixes #33)
 <br />
 
 # How To Use Submenus

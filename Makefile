@@ -17,16 +17,21 @@ endif
 
 APP_TITLE		:=	EdiZon
 APP_AUTHOR		:=	WerWolv & proferabg & ppkantorski
-APP_VERSION		:=	v1.0.10
+APP_VERSION		:=	v1.0.10+
 
 TARGET			:=	EdiZon
 OUTDIR			:=	out
 BUILD			:=	build
-SOURCES_TOP		:=	source libs/libultrahand/libultra/source
+SOURCES_TOP		:=	source
 SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
-INCLUDES		:=	include libs/libultrahand/libultra/include libs/libultrahand/libtesla/include
+INCLUDES		:=	include
 #EXCLUDES		:=  dmntcht.c
 DATA			:=	data
+
+# This location should reflect where you place the libultrahand directory (lib can vary between projects).
+include ${TOPDIR}/libs/libultrahand/ultrahand.mk
+
+
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
@@ -42,11 +47,7 @@ CFLAGS	+= -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --
 UI_OVERRIDE_PATH := /config/edizon/
 CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
 
-# Disable fstream
-NO_FSTREAM_DIRECTIVE := 1
-CFLAGS += -DNO_FSTREAM_DIRECTIVE=$(NO_FSTREAM_DIRECTIVE)
-
-CXXFLAGS := $(CFLAGS) -std=c++20 -Wno-dangling-else -ffast-math
+CXXFLAGS := $(CFLAGS) -std=c++23 -Wno-dangling-else -ffast-math
 
 ASFLAGS := $(ARCH)
 LDFLAGS += -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
@@ -187,8 +188,10 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 all	:  $(OUTPUT).ovl
 
-$(OUTPUT).ovl	:	$(OUTPUT).nro
+$(OUTPUT).ovl : $(OUTPUT).nro
 	@cp $(OUTPUT).nro $(OUTPUT).ovl
+	@printf 'ULTR' >> $(OUTPUT).ovl
+	@echo "Ultrahand signature has been added."
 
 $(OUTPUT).nsp	:	$(OUTPUT).nso $(OUTPUT).npdm
 

@@ -48,16 +48,16 @@ public:
     virtual tsl::elm::Element* createUI() {
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultOverlayColor));
-            renderer->drawString(APP_VERSION, false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, (tsl::defaultOverlayColor));
+            renderer->drawString(APP_VERSION, false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
-                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, (tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, (tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, (tsl::style::color::ColorHighlight));
             }
         }));
 
@@ -113,23 +113,23 @@ public:
         auto rootFrame = new tsl::elm::HeaderOverlayFrame(97);
 
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50+2, 32, renderer->a(tsl::defaultOverlayColor));
-            renderer->drawString("Cheats", false, 20, 50+23, 15, renderer->a(tsl::versionTextColor));
+            renderer->drawString("EdiZon", false, 20, 50+2, 32, (tsl::defaultOverlayColor));
+            renderer->drawString("Cheats", false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
-                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
-                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, (tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, (tsl::style::color::ColorHighlight));
+                renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, (tsl::style::color::ColorHighlight));
             }
         }));
 
         if (edz::cheat::CheatManager::getCheats().size() == 0) {
             auto warning = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
-                renderer->drawString("\uE150", false, 180, 274, 90, renderer->a(0xFFFF));
-                renderer->drawString("No Cheats loaded!", false, 110, 360, 25, renderer->a(0xFFFF));
+                renderer->drawString("\uE150", false, 180, 274, 90, (0xFFFF));
+                renderer->drawString("No Cheats loaded!", false, 110, 360, 25, (0xFFFF));
             });
 
             rootFrame->setContent(warning);
@@ -214,8 +214,8 @@ public:
             // display if no cheats in submenu
             if(this->m_numCheats < 1){
                 auto warning = new tsl::elm::CustomDrawer([](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
-                    renderer->drawString("\uE150", false, 180, 250, 90, renderer->a(0xFFFF));
-                    renderer->drawString("No Cheats in Submenu!", false, 110, 340, 25, renderer->a(0xFFFF));
+                    renderer->drawString("\uE150", false, 180, 250, 90, (0xFFFF));
+                    renderer->drawString("No Cheats in Submenu!", false, 110, 340, 25, (0xFFFF));
                 });
 
                 rootFrame->setContent(warning);
@@ -276,32 +276,36 @@ public:
     
         auto infos = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
     
-            renderer->drawString("CPU Temperature:", false, 63, 200, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("PCB Temperature:", false, 63, 230, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("CPU Temperature:", false, 63, 200, 18, (tsl::style::color::ColorText));
+            renderer->drawString("PCB Temperature:", false, 63, 230, 18, (tsl::style::color::ColorText));
     
             renderer->drawRect(x, 243, w, 1, renderer->a(tsl::style::color::ColorFrame));
-            renderer->drawString("CPU Clock:", false, 63, 270, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("GPU Clock:", false, 63, 300, 18, renderer->a(tsl::style::color::ColorText));
-            renderer->drawString("MEM Clock:", false, 63, 330, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("CPU Clock:", false, 63, 270, 18, (tsl::style::color::ColorText));
+            renderer->drawString("GPU Clock:", false, 63, 300, 18, (tsl::style::color::ColorText));
+            renderer->drawString("MEM Clock:", false, 63, 330, 18, (tsl::style::color::ColorText));
     
             renderer->drawRect(x, 343, w, 1, renderer->a(tsl::style::color::ColorFrame));
-            renderer->drawString("Local IP:", false, 63, 370, 18, renderer->a(tsl::style::color::ColorText));
+            renderer->drawString("Local IP:", false, 63, 370, 18, (tsl::style::color::ColorText));
     
     
             // Draw temperatures and battery percentage
             static char PCB_temperatureStr[10];
             static char SOC_temperatureStr[10];
             
-            ult::ReadSocTemperature(&ult::SOC_temperature, false);
-            ult::ReadPcbTemperature(&ult::PCB_temperature, false);
+            // Use temporary float variables to receive the temperature values
+            static float tempSOC = 0.0f;
+            static float tempPCB = 0.0f;
+
+            ult::ReadSocTemperature(&tempSOC, false);
+            ult::ReadPcbTemperature(&tempPCB, false);
     
-            snprintf(SOC_temperatureStr, sizeof(SOC_temperatureStr) - 1, "%.1f °C", static_cast<double>(ult::SOC_temperature));
-            snprintf(PCB_temperatureStr, sizeof(PCB_temperatureStr) - 1, "%.1f °C", static_cast<double>(ult::PCB_temperature));
+            snprintf(SOC_temperatureStr, sizeof(SOC_temperatureStr) - 1, "%.1f °C", static_cast<double>(tempSOC));
+            snprintf(PCB_temperatureStr, sizeof(PCB_temperatureStr) - 1, "%.1f °C", static_cast<double>(tempPCB));
             
-            renderer->drawString(SOC_temperatureStr, false, 258, 200, 18, renderer->a(tsl::style::color::ColorHighlight));
-            renderer->drawString(PCB_temperatureStr, false, 258, 230, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(SOC_temperatureStr, false, 258, 200, 18, (tsl::style::color::ColorHighlight));
+            renderer->drawString(PCB_temperatureStr, false, 258, 230, 18, (tsl::style::color::ColorHighlight));
             
-            u32 cpuClock = 0, gpuClock = 0, memClock = 0;
+            static u32 cpuClock = 0, gpuClock = 0, memClock = 0;
     
             if (hosversionAtLeast(8,0,0)) {
                 clkrstGetClockRate(&this->m_clkrstSessionCpu, &cpuClock);
@@ -313,21 +317,21 @@ public:
                 pcvGetClockRate(PcvModule_EMC, &memClock);
             }
     
-            renderer->drawString(formatString("%.01f MHz", cpuClock / 1'000'000.0F).c_str(), false, 258, 270, 18, renderer->a(tsl::style::color::ColorHighlight));
-            renderer->drawString(formatString("%.01f MHz", gpuClock / 1'000'000.0F).c_str(), false, 258, 300, 18, renderer->a(tsl::style::color::ColorHighlight));
-            renderer->drawString(formatString("%.01f MHz", memClock / 1'000'000.0F).c_str(), false, 258, 330, 18, renderer->a(tsl::style::color::ColorHighlight));
+            renderer->drawString(formatString("%.01f MHz", cpuClock / 1'000'000.0F).c_str(), false, 258, 270, 18, (tsl::style::color::ColorHighlight));
+            renderer->drawString(formatString("%.01f MHz", gpuClock / 1'000'000.0F).c_str(), false, 258, 300, 18, (tsl::style::color::ColorHighlight));
+            renderer->drawString(formatString("%.01f MHz", memClock / 1'000'000.0F).c_str(), false, 258, 330, 18, (tsl::style::color::ColorHighlight));
     
             if (this->m_ipAddressString ==  "0.0.0.0")
-                renderer->drawString("Offline", false, 258, 370, 18, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString("Offline", false, 258, 370, 18, (tsl::style::color::ColorHighlight));
             else 
-                renderer->drawString(this->m_ipAddressString.c_str(), false, 258, 370, 18, renderer->a(tsl::style::color::ColorHighlight));
+                renderer->drawString(this->m_ipAddressString.c_str(), false, 258, 370, 18, (tsl::style::color::ColorHighlight));
     
             if(hosversionAtLeast(15,0,0)){
                 NifmInternetConnectionType conType;
                 u32 wifiStrength;
                 NifmInternetConnectionStatus conStatus;
                 nifmGetInternetConnectionStatus(&conType, &wifiStrength, &conStatus);
-                renderer->drawString("Connection:", false, 63, 400, 18, renderer->a(tsl::style::color::ColorText));
+                renderer->drawString("Connection:", false, 63, 400, 18, (tsl::style::color::ColorText));
                 if(conStatus == NifmInternetConnectionStatus_Connected && conType == NifmInternetConnectionType_WiFi) {
                     std::string wifiStrengthStr = "(Strong)";
                     tsl::Color color = tsl::Color(0x0, 0xF, 0x0, 0xF);
@@ -338,19 +342,19 @@ public:
                         wifiStrengthStr = "(Poor)";
                         color = tsl::Color(0xF, 0x0, 0x0, 0xF);
                     }
-                    renderer->drawString("WiFi", false, 258, 400, 18, renderer->a(tsl::style::color::ColorHighlight));
-                    renderer->drawString(wifiStrengthStr.c_str(), false, 303, 400, 18, renderer->a(color));
+                    renderer->drawString("WiFi", false, 258, 400, 18, (tsl::style::color::ColorHighlight));
+                    renderer->drawString(wifiStrengthStr.c_str(), false, 303, 400, 18, (color));
                 } else if(conStatus == NifmInternetConnectionStatus_Connected && conType == NifmInternetConnectionType_Ethernet){
-                    renderer->drawString("Ethernet", false, 258, 400, 18, renderer->a(tsl::style::color::ColorHighlight));
+                    renderer->drawString("Ethernet", false, 258, 400, 18, (tsl::style::color::ColorHighlight));
                 } else {
-                    renderer->drawString("Disconnected", false, 258, 400, 18, renderer->a(tsl::style::color::ColorHighlight));
+                    renderer->drawString("Disconnected", false, 258, 400, 18, (tsl::style::color::ColorHighlight));
                 }
             } else {
                 s32 signalStrength = 0;
                 wlaninfGetRSSI(&signalStrength);
     
-                renderer->drawString("WiFi Signal:", false, 63, 400, 18, renderer->a(tsl::style::color::ColorText));
-                renderer->drawString(formatString("%d dBm", signalStrength).c_str(), false, 258, 400, 18, renderer->a(tsl::style::color::ColorHighlight)); 
+                renderer->drawString("WiFi Signal:", false, 63, 400, 18, (tsl::style::color::ColorText));
+                renderer->drawString(formatString("%d dBm", signalStrength).c_str(), false, 258, 400, 18, (tsl::style::color::ColorHighlight)); 
             }
         });
         rootFrame->setContent(infos);

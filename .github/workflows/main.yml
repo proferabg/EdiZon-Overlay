@@ -7,9 +7,6 @@ on:
         description: 'Branch to run on'
         required: true
         default: 'main'
-  push:
-    branches:
-      - main
 
 jobs:
   build_and_release:
@@ -43,6 +40,7 @@ jobs:
           VERSION=$(awk '/^APP_VERSION/{print $3}' $VER_FILE)
           echo "TAG=${VERSION}" >> "${GITHUB_ENV}"
           echo "RELEASE_NAME=${VERSION}" >> "${GITHUB_ENV}"
+          echo "RELEASE=1" >> "${GITHUB_ENV}"
         shell: bash
       - name: Replace Tesla Colors
         run: |
@@ -66,4 +64,4 @@ jobs:
           make_latest: true
           files: |
             ./SdOut/EdiZon-Overlay.zip
-            ./SdOut/ovlEdiZon.ovl
+            ./SdOut/switch/.overlays/ovlEdiZon.ovl

@@ -17,7 +17,7 @@ endif
 
 APP_TITLE		:=	EdiZon
 APP_AUTHOR		:=	WerWolv & proferabg & ppkantorski
-APP_VERSION		:=	v1.0.10+
+APP_VERSION		:=	v1.0.11
 
 TARGET			:=	EdiZon
 OUTDIR			:=	out
@@ -191,7 +191,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 all	:  $(OUTPUT).ovl
 
-$(OUTPUT).ovl : $(OUTPUT).nro
+$(OUTPUT).ovl	:	$(OUTPUT).nro
 	@cp $(OUTPUT).nro $(OUTPUT).ovl
 	@printf 'ULTR' >> $(OUTPUT).ovl
 	@echo "Ultrahand signature has been added."

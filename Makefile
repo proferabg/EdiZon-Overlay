@@ -31,7 +31,6 @@ DATA			:=	data
 # This location should reflect where you place the libultrahand directory (lib can vary between projects).
 include ${TOPDIR}/libs/libultrahand/ultrahand.mk
 
-
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
@@ -46,6 +45,10 @@ CFLAGS	+= -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --
 # Enable appearance overriding
 UI_OVERRIDE_PATH := /config/edizon/
 CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
+
+# Disable fstream
+NO_FSTREAM_DIRECTIVE := 1
+CFLAGS += -DNO_FSTREAM_DIRECTIVE=$(NO_FSTREAM_DIRECTIVE)
 
 CXXFLAGS := $(CFLAGS) -std=c++23 -Wno-dangling-else -ffast-math
 

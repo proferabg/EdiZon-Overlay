@@ -17,3 +17,8 @@
 build/
 out/
 *.lst
+
+#
+# Custom
+#
+SdOut/

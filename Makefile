@@ -9,13 +9,12 @@ endif
 TOPDIR ?= $(CURDIR)
 include $(DEVKITPRO)/libnx/switch_rules
 
-APP_TITLE		:=	EdiZon-Overlay
+APP_TITLE		:=	EdiZon
 APP_FILENAME	:=  ovlEdiZon
-APP_AUTHOR		:=	WerWolv & proferabg & ppkantorski
+APP_AUTHOR		:=	WerWolv, proferabg, and ppkantorski
 APP_VERSION		:=	v1.0.11
-export APP_TITLE
 
-ifeq ($(RELEASE),)
+ifeq ($(RELEASE), 1)
 	APP_VERSION	:=	$(APP_VERSION)-$(shell git describe --always)
 endif
 
@@ -39,14 +38,10 @@ SPACE     	:=  $(null) $(null)
 
 ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:=	-g -Wall -O3 -ffunction-sections \
-			$(ARCH) $(DEFINES) \
-			-DVERSION_MAJOR=${VERSION_MAJOR} \
-			-DVERSION_MINOR=${VERSION_MINOR} \
-			-DVERSION_MICRO=${VERSION_MICRO} \
-			-DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
+CFLAGS	:=	-g -Wall -O3 -ffunction-sections $(ARCH) $(DEFINES) -DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations -DAPP_VERSION=\"$(APP_VERSION)\"
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations 
+CFLAGS	+=	-DAPP_VERSION=\"$(APP_VERSION)\" -DAPP_TITLE=\"$(APP_TITLE)\" -DAPP_AUTHOR=\""$(APP_AUTHOR)"\"
 
 CXXFLAGS	:= $(CFLAGS) -fexceptions -std=gnu++23
 
@@ -158,11 +153,10 @@ all: $(BUILD)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@ $(BUILD) $(OUTDIR)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-	@cp -rf $(OUTPUT).nro $(OUTPUT).ovl
 	@rm -rf SdOut
 	@mkdir -p SdOut/switch/.overlays
 	@cp -rf $(OUTPUT).ovl SdOut/switch/.overlays/
-	@cd $(CURDIR)/SdOut; zip -r -q -9 $(APP_TITLE).zip switch; cd $(CURDIR)
+	@cd $(CURDIR)/SdOut; zip -r -q -9 $(APP_TITLE)-Overlay.zip switch; cd $(CURDIR)
 
 #---------------------------------------------------------------------------------
 clean:

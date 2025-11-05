@@ -201,7 +201,7 @@ public:
                         replaceAll(cheatNameCheck, ":ENABLED", "");
 
                         auto cheatToggleItem = new tsl::elm::ToggleListItem(/*formatString("%d:%s: %s", cheat->getID(), (cheat->isEnabled() ? "y" : "n"),*/ cheatNameCheck/*.c_str()).c_str()*/, cheat->isEnabled());
-                        cheatToggleItem->setStateChangedListener([&cheat, cheatToggleItem](bool state) { cheat->setState(state); cheatToggleItem->triggerClickAnimation();});
+                        cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state);});
 
                         this->m_cheatToggleItems.insert({cheat->getID(), cheatToggleItem});
                         list->addItem(cheatToggleItem);
@@ -215,7 +215,7 @@ public:
                     replaceAll(cheatNameCheck, ":ENABLED", "");
 
                     auto cheatToggleItem = new tsl::elm::ToggleListItem(cheatNameCheck, cheat->isEnabled());
-                    cheatToggleItem->setStateChangedListener([&cheat, cheatToggleItem](bool state) { cheat->setState(state); cheatToggleItem->triggerClickAnimation();});
+                    cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
 
                     this->m_cheatToggleItems.insert({cheat->getID(), cheatToggleItem});
                     list->addItem(cheatToggleItem);

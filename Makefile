@@ -47,12 +47,12 @@ CFLAGS	+= -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --
 UI_OVERRIDE_PATH := /config/edizon/
 CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
 
-CXXFLAGS := $(CFLAGS) -std=c++23 -Wno-dangling-else -ffast-math
+CXXFLAGS := $(CFLAGS) -std=c++26 -Wno-dangling-else -ffast-math
 
 ASFLAGS := $(ARCH)
 LDFLAGS += -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS := -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -ljansson -lnx
+LIBS := -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -lnx
 
 CXXFLAGS += -fno-exceptions -ffunction-sections -fdata-sections -fno-rtti
 LDFLAGS += -Wl,--gc-sections -Wl,--as-needed

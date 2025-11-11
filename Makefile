@@ -9,17 +9,16 @@ endif
 TOPDIR ?= $(CURDIR)
 include $(DEVKITPRO)/libnx/switch_rules
 
-ifeq ($(SNAPSHOT), 1)
-	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} Snapshot
-else
-	APP_VERSION	:=	${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+APP_TITLE		:=	EdiZon
+APP_FILENAME	:=  ovlEdiZon
+APP_AUTHOR		:=	WerWolv, proferabg, and ppkantorski
+APP_VERSION		:=	v1.0.12
+
+ifeq ($(RELEASE), 1)
+	APP_VERSION	:=	$(APP_VERSION)-$(shell git describe --always)
 endif
 
-APP_TITLE		:=	EdiZon
-APP_AUTHOR		:=	WerWolv & proferabg & ppkantorski
-APP_VERSION		:=	v1.0.10+
-
-TARGET			:=	EdiZon
+TARGET			:=	$(APP_TITLE)
 OUTDIR			:=	out
 BUILD			:=	build
 SOURCES_TOP		:=	source
@@ -31,37 +30,25 @@ DATA			:=	data
 # This location should reflect where you place the libultrahand directory (lib can vary between projects).
 include ${TOPDIR}/libs/libultrahand/ultrahand.mk
 
-
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH := -march=armv8-a+simd+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+null      	:=
+SPACE     	:=  $(null) $(null)
 
-CFLAGS := -Wall -Os -ffunction-sections -fdata-sections -flto\
-			$(ARCH) $(DEFINES)
+ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS += $(INCLUDE) -D__SWITCH__ -DAPP_VERSION="\"$(APP_VERSION)\"" -D_FORTIFY_SOURCE=2
-CFLAGS	+= -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations
+CFLAGS	:=	-g -Wall -O3 -ffunction-sections $(ARCH) $(DEFINES) -DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
 
-# Enable appearance overriding
-UI_OVERRIDE_PATH := /config/edizon/
-CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations 
+CFLAGS	+=	-DAPP_VERSION=\"$(APP_VERSION)\" -DAPP_TITLE=\"$(APP_TITLE)\" -DAPP_AUTHOR=\""$(APP_AUTHOR)"\"
 
-CXXFLAGS := $(CFLAGS) -std=c++26 -Wno-dangling-else -ffast-math
+CXXFLAGS	:= $(CFLAGS) -fexceptions -std=c++26
 
-ASFLAGS := $(ARCH)
-LDFLAGS += -specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) -Wl,-Map,$(notdir $*.map)
+ASFLAGS	:=	-g $(ARCH)
+LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS := -lcurl -lz -lzzip -lmbedtls -lmbedx509 -lmbedcrypto -lnx
-
-CXXFLAGS += -fno-exceptions -ffunction-sections -fdata-sections -fno-rtti
-LDFLAGS += -Wl,--gc-sections -Wl,--as-needed
-
-# For Ensuring Parallel LTRANS Jobs w/ GCC, make -j6
-CXXFLAGS += -flto -fuse-linker-plugin -flto=6
-LDFLAGS += -flto=6
-
-
+LIBS	:= -lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -77,7 +64,7 @@ LIBDIRS	:= $(CURDIR)/libs/nxpy $(PORTLIBS) $(LIBNX)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(OUTDIR)/ovlEdiZon
+export OUTPUT	:=	$(CURDIR)/$(OUTDIR)/$(APP_FILENAME)
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -147,7 +134,7 @@ ifeq ($(strip $(NO_ICON)),)
 endif
 
 ifeq ($(strip $(NO_NACP)),)
-	export NROFLAGS += --nacp=$(CURDIR)/$(OUTDIR)/ovlEdiZon.nacp
+	export NROFLAGS += --nacp=$(OUTPUT).nacp
 endif
 
 ifneq ($(APP_TITLEID),)
@@ -166,16 +153,20 @@ all: $(BUILD)
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@ $(BUILD) $(OUTDIR)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@rm -rf SdOut
+	@mkdir -p SdOut/switch/.overlays
+	@cp -rf $(OUTPUT).ovl SdOut/switch/.overlays/
+	@cd $(CURDIR)/SdOut; zip -r -q -9 $(APP_TITLE)-Overlay.zip switch; cd $(CURDIR)
 
 #---------------------------------------------------------------------------------
 clean:
-	@echo " RM   " $(BUILD) $(OUTDIR)
-	@rm -fr $(BUILD) $(OUTDIR)
+	@echo " RM   " $(BUILD) $(OUTDIR) SdOut
+	@rm -fr $(BUILD) $(OUTDIR) SdOut
 
 #---------------------------------------------------------------------------------
 install: all
 	@echo " LFTP " $@
-	@lftp -e "put -O /switch/.overlays ./out/ovlEdiZon.ovl;bye" $(IP)
+	@lftp -e "put -O /switch/.overlays ./out/$(APP_FILENAME).ovl;bye" $(IP)
 
 #---------------------------------------------------------------------------------
 else
@@ -188,7 +179,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 all	:  $(OUTPUT).ovl
 
-$(OUTPUT).ovl : $(OUTPUT).nro
+$(OUTPUT).ovl	:	$(OUTPUT).nro
 	@cp $(OUTPUT).nro $(OUTPUT).ovl
 	@printf 'ULTR' >> $(OUTPUT).ovl
 	@echo "Ultrahand signature has been added."

@@ -9,88 +9,57 @@ endif
 TOPDIR ?= $(CURDIR)
 include $(DEVKITPRO)/libnx/switch_rules
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-# ROMFS is the directory containing data to be added to RomFS, relative to the Makefile (Optional)
-#
-# NO_ICON: if set to anything, do not use icon.
-# NO_NACP: if set to anything, no .nacp file is generated.
-# APP_TITLE is the name of the app stored in the .nacp file (Optional)
-# APP_AUTHOR is the author of the app stored in the .nacp file (Optional)
-# APP_VERSION is the version of the app stored in the .nacp file (Optional)
-# APP_TITLEID is the titleID of the app stored in the .nacp file (Optional)
-# ICON is the filename of the icon (.jpg), relative to the project folder.
-#   If not set, it attempts to use one of the following (in this order):
-#     - <Project name>.jpg
-#     - icon.jpg
-#     - <libnx folder>/default_icon.jpg
-#
-# CONFIG_JSON is the filename of the NPDM config file (.json), relative to the project folder.
-#   If not set, it attempts to use one of the following (in this order):
-#     - <Project name>.json
-#     - config.json
-#   If a JSON file is provided or autodetected, an ExeFS PFS0 (.nsp) is built instead
-#   of a homebrew executable (.nro). This is intended to be used for sysmodules.
-#   NACP building is skipped as well.
-#---------------------------------------------------------------------------------
-APP_TITLE	:=	Status Monitor
-APP_VERSION	:=	1.3.2+
-TARGET		:=	$(notdir $(CURDIR))
-BUILD		:=	build
-SOURCES		:=	source
-INCLUDES	:=	include lib/Atmosphere-libs/libstratosphere/source/dmnt lib/Atmosphere-libs/libstratosphere/source
-NO_ICON		:=  1
-#ROMFS       :=  romfs
+APP_TITLE		:=	EdiZon
+APP_FILENAME	:=  ovlEdiZon
+APP_AUTHOR		:=	WerWolv, proferabg, and ppkantorski
+APP_VERSION		:=	v1.0.12
+
+ifeq ($(RELEASE), 1)
+	APP_VERSION	:=	$(APP_VERSION)-$(shell git describe --always)
+endif
+
+TARGET			:=	$(APP_TITLE)
+OUTDIR			:=	out
+BUILD			:=	build
+SOURCES_TOP		:=	source
+SOURCES			+=  $(foreach dir,$(SOURCES_TOP),$(shell find $(dir) -type d 2>/dev/null))
+INCLUDES		:=	include
+#EXCLUDES		:=  dmntcht.c
+DATA			:=	data
 
 # This location should reflect where you place the libultrahand directory (lib can vary between projects).
-include ${TOPDIR}/lib/libultrahand/ultrahand.mk
-
+include ${TOPDIR}/libs/libultrahand/ultrahand.mk
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	-march=armv8-a+simd+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
+null      	:=
+SPACE     	:=  $(null) $(null)
 
-CFLAGS	:=	-g -Wall -Wno-address-of-packed-member -O3 -ffunction-sections -ffast-math -flto -fomit-frame-pointer \
+ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
+
+CFLAGS := -g -Wall -O3 -ffunction-sections -fdata-sections -flto\
+            -ffast-math -fomit-frame-pointer \
             -fuse-linker-plugin -finline-small-functions \
             -fno-strict-aliasing -frename-registers -falign-functions=16 \
-			$(ARCH) $(DEFINES)
-
-# For compiling Ultrahand Overlay only
-IS_STATUS_MONITOR_DIRECTIVE := 1
-CFLAGS += -DIS_STATUS_MONITOR_DIRECTIVE=$(IS_STATUS_MONITOR_DIRECTIVE)
-
-# Enable appearance overriding
-UI_OVERRIDE_PATH := /config/status-monitor/
-CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
+			$(ARCH) $(DEFINES)  -DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
 
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DAPP_VERSION="\"$(APP_VERSION)\""
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations 
+CFLAGS	+=	-DAPP_VERSION=\"$(APP_VERSION)\" -DAPP_TITLE=\"$(APP_TITLE)\" -DAPP_AUTHOR=\""$(APP_AUTHOR)"\"
 
-CXXFLAGS	:= $(CFLAGS) -std=c++26 -Wno-dangling-else -fno-unwind-tables -fno-asynchronous-unwind-tables
+CXXFLAGS	:= $(CFLAGS) -fexceptions -std=c++26
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS := -lnx
-
-CXXFLAGS += -fno-exceptions -ffunction-sections -fdata-sections -fno-rtti
-LDFLAGS += -Wl,--gc-sections -Wl,--as-needed
-
-
-# For Ensuring Parallel LTRANS Jobs w/ GCC, make -j6
-CXXFLAGS += -flto -fuse-linker-plugin -flto=6
-LDFLAGS += -flto=6
+LIBS	:= -lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX)
+LIBDIRS	:= $(CURDIR)/libs/nxpy $(PORTLIBS) $(LIBNX)
 
 
 #---------------------------------------------------------------------------------
@@ -100,18 +69,19 @@ LIBDIRS	:= $(PORTLIBS) $(LIBNX)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export OUTPUT	:=	$(CURDIR)/$(OUTDIR)/$(APP_FILENAME)
 export TOPDIR	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+
+CFILES			:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c))))
+CPPFILES		:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp))))
+SFILES			:=	$(filter-out $(EXCLUDES),$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s))))
+BINFILES		:=	$(filter-out $(EXCLUDES),$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*))))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
@@ -129,7 +99,7 @@ endif
 
 export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
 export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-export OFILES 	:=	$(OFILES_BIN) $(OFILES_SRC)
+export OFILES 		:=	$(OFILES_BIN) $(OFILES_SRC)
 export HFILES_BIN	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
@@ -169,7 +139,7 @@ ifeq ($(strip $(NO_ICON)),)
 endif
 
 ifeq ($(strip $(NO_NACP)),)
-	export NROFLAGS += --nacp=$(CURDIR)/$(TARGET).nacp
+	export NROFLAGS += --nacp=$(OUTPUT).nacp
 endif
 
 ifneq ($(APP_TITLEID),)
@@ -180,32 +150,29 @@ ifneq ($(ROMFS),)
 	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
 endif
 
-.PHONY: $(BUILD) clean all
+.PHONY: $(BUILD) clean all install
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)
 
-
 $(BUILD):
-	@[ -d $@ ] || mkdir -p $@
+	@[ -d $@ ] || mkdir -p $@ $(BUILD) $(OUTDIR)
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-	@rm -rf out/
-	@mkdir -p out/switch/.overlays/
-	@cp -a $(CURDIR)/config out/
-	@cp $(CURDIR)/$(TARGET).ovl out/switch/.overlays/$(TARGET).ovl
+	@rm -rf SdOut
+	@mkdir -p SdOut/switch/.overlays
+	@cp -rf $(OUTPUT).ovl SdOut/switch/.overlays/
+	@cd $(CURDIR)/SdOut; zip -r -q -9 $(APP_TITLE)-Overlay.zip switch; cd $(CURDIR)
 
 #---------------------------------------------------------------------------------
 clean:
-	@echo "Cleanning ... $(TARGET)"
-	@rm -fr $(BUILD) $(TARGET).ovl $(TARGET).nro $(TARGET).nacp $(TARGET).elf
-	@rm -rf out/
-	@rm -f $(TARGET).zip
+	@echo " RM   " $(BUILD) $(OUTDIR) SdOut
+	@rm -fr $(BUILD) $(OUTDIR) SdOut
 
 #---------------------------------------------------------------------------------
-dist: all
-	@echo making dist ...
-	@rm -f $(TARGET).zip
-	@cd out; zip -r ../$(TARGET).zip ./*; cd ../
+install: all
+	@echo " LFTP " $@
+	@lftp -e "put -O /switch/.overlays ./out/$(APP_FILENAME).ovl;bye" $(IP)
+
 #---------------------------------------------------------------------------------
 else
 .PHONY:	all
@@ -215,13 +182,18 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-all	:	 $(OUTPUT).ovl
+all	:  $(OUTPUT).ovl
 
-$(OUTPUT).ovl		:	$(OUTPUT).elf $(OUTPUT).nacp 
-	@elf2nro $< $@ $(NROFLAGS)
-	@echo "built ... $(notdir $(OUTPUT).ovl)"
-	@printf 'ULTR' >> $@
-	@printf "Ultrahand signature has been added.\n"
+$(OUTPUT).ovl	:	$(OUTPUT).nro
+	@cp $(OUTPUT).nro $(OUTPUT).ovl
+	@printf 'ULTR' >> $(OUTPUT).ovl
+	@echo "Ultrahand signature has been added."
+
+$(OUTPUT).nsp	:	$(OUTPUT).nso $(OUTPUT).npdm
+
+$(OUTPUT).nso	:	$(OUTPUT).elf
+
+$(OUTPUT).nro	:	$(OUTPUT).nso $(OUTPUT).nacp
 
 $(OUTPUT).elf	:	$(OFILES)
 
@@ -231,8 +203,11 @@ $(OFILES_SRC)	: $(HFILES_BIN)
 # you need a rule like this for each extension you use as binary data
 #---------------------------------------------------------------------------------
 %.bin.o	%_bin.h :	%.bin
-#---------------------------------------------------------------------------------
-	@echo $(notdir $<)
+	@echo " BIN  " $@
+	@$(bin2o)
+
+%.ttf.o	%_ttf.h :	%.ttf
+	@echo " BIN  " $@
 	@$(bin2o)
 
 -include $(DEPENDS)

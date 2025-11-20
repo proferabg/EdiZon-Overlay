@@ -12,7 +12,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 APP_TITLE		:=	EdiZon
 APP_FILENAME	:=  ovlEdiZon
 APP_AUTHOR		:=	WerWolv, proferabg, and ppkantorski
-APP_VERSION		:=	v1.0.12
+APP_VERSION		:=	v1.0.11
 
 ifeq ($(RELEASE), 1)
 	APP_VERSION	:=	$(APP_VERSION)-$(shell git describe --always)
@@ -38,11 +38,9 @@ SPACE     	:=  $(null) $(null)
 
 ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS := -g -Wall -O3 -ffunction-sections -fdata-sections -flto\
-            -ffast-math -fomit-frame-pointer \
-            -fuse-linker-plugin -finline-small-functions \
-            -fno-strict-aliasing -frename-registers -falign-functions=16 \
-			$(ARCH) $(DEFINES)  -DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
+CFLAGS	:= -g -Wall -O3 -ffunction-sections -fdata-sections -flto -ffast-math -fomit-frame-pointer \
+					-fuse-linker-plugin -finline-small-functions -fno-strict-aliasing -frename-registers -falign-functions=16 \
+					$(ARCH) $(DEFINES) -DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
 
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations 

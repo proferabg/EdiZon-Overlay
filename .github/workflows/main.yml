@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run on'
+        required: true
+        default: 'main'
+
+jobs:
+  build_and_release:
+    name: Build and release
+    runs-on: ubuntu-22.04
+    container: devkitpro/devkita64:20250728
+    steps:
+      - name: Update packages
+        run: |
+          sudo -n apt-get update
+          sudo -n apt-get install -y build-essential zip python3 python3-pip python3-lz4
+        shell: bash
+      - name: Update latest libnx
+        run: |
+          git config --global --add safe.directory "*"
+          git clone --recurse-submodules https://github.com/switchbrew/libnx.git
+          cd libnx
+          make install -j$(nproc)
+        shell: bash
+      - name: Checkout latest code
+        uses: actions/checkout@v5.0.0
+        with:
+          ref: main
+          clean: true
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: recursive
+      - name: Setup ENV parameters
+        run: |
+          VER_FILE=Makefile
+          VERSION=$(awk '/^APP_VERSION/{print $3}' $VER_FILE)
+          echo "TAG=${VERSION}" >> "${GITHUB_ENV}"
+          echo "RELEASE_NAME=${VERSION}" >> "${GITHUB_ENV}"
+          echo "RELEASE=1" >> "${GITHUB_ENV}"
+        shell: bash
+      - name: Replace Tesla Colors
+        run: |
+          sed -i '/constexpr Color ColorHighlight/c\            constexpr Color ColorHighlight        = { 0x0, 0xC, 0xF, 0xF };   ///< Greenish highlight color' ./libs/libultrahand/libtesla/include/tesla.hpp
+          sed -i '/static Color onTextColor/c\    static Color onTextColor = RGB888("00CCFF");' ./libs/libultrahand/libtesla/include/tesla.hpp
+          sed -i '/static Color trackBarFullColor/c\    static Color trackBarFullColor = RGB888("00CCFF");' ./libs/libultrahand/libtesla/include/tesla.hpp
+        shell: bash
+      - name: Build
+        run: |
+          export DEVKITPRO=/opt/devkitpro
+          make all
+        shell: bash
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2.4.1
+        with:
+          name: ${{ env.RELEASE_NAME }}
+          tag_name: ${{ env.TAG }}
+          draft: false
+          prerelease: false
+          generate_release_notes: yes
+          make_latest: true
+          files: |
+            ./SdOut/EdiZon-Overlay.zip
+            ./SdOut/switch/.overlays/ovlEdiZon.ovl

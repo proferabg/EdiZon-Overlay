@@ -48,7 +48,7 @@ public:
     virtual tsl::elm::Element* createUI() {
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50, 32, (tsl::defaultOverlayColor));
+            renderer->drawString(APP_TITLE, false, 20, 50, 32, (tsl::defaultOverlayColor));
             renderer->drawString(APP_VERSION, false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
@@ -117,7 +117,7 @@ public:
         bool setOnce = true; // for ensuring header sync with frame caching for header overlayframe
 
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this, &setOnce](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString("EdiZon", false, 20, 50, 32, (tsl::defaultOverlayColor));
+            renderer->drawString(APP_TITLE, false, 20, 50, 32, (tsl::defaultOverlayColor));
 
             //static bool runOnce = true;
             if (setOnce) {
@@ -286,7 +286,7 @@ public:
      }
             
     virtual tsl::elm::Element* createUI() override {
-        auto rootFrame = new tsl::elm::OverlayFrame("EdiZon", "System Information");
+        auto rootFrame = new tsl::elm::OverlayFrame(APP_TITLE, "System Information");
     
         auto infos = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h){
     
@@ -370,6 +370,8 @@ public:
                 renderer->drawString("WiFi Signal:", false, 63, 400, 18, (tsl::style::color::ColorText));
                 renderer->drawString(formatString("%d dBm", signalStrength).c_str(), false, 258, 400, 18, (tsl::style::color::ColorHighlight)); 
             }
+            renderer->drawString("Credits:", false, 63, 600, 18, (tsl::style::color::ColorText));
+            renderer->drawString(APP_AUTHOR, false, 75, 630, 18, (tsl::style::color::ColorHighlight)); 
         });
         rootFrame->setContent(infos);
     

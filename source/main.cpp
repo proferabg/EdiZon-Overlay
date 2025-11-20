@@ -48,13 +48,13 @@ public:
     virtual tsl::elm::Element* createUI() {
         auto *rootFrame = new tsl::elm::HeaderOverlayFrame();
         rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString(APP_TITLE, false, 20, 50+2, 32, (tsl::defaultOverlayColor));
+            renderer->drawString(APP_TITLE, false, 20, 50, 32, (tsl::defaultOverlayColor));
             renderer->drawString(APP_VERSION, false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
-                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, (tsl::style::color::ColorText));
-                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, (tsl::style::color::ColorText));
-                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Program ID", false, 150 +14, 40 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Build ID", false, 150 +14, 60 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Process ID", false, 150 +14, 80 -6, 15, (tsl::style::color::ColorText));
                 renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, (tsl::style::color::ColorHighlight));
                 renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, (tsl::style::color::ColorHighlight));
                 renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, (tsl::style::color::ColorHighlight));
@@ -88,6 +88,7 @@ public:
         });
         list->addItem(statsItem);
 
+        //list->disableCaching();
         rootFrame->setContent(list);
         return rootFrame;
     }
@@ -112,14 +113,24 @@ public:
     virtual tsl::elm::Element* createUI() override {
         auto rootFrame = new tsl::elm::HeaderOverlayFrame(97);
 
-        rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
-            renderer->drawString(APP_TITLE, false, 20, 50+2, 32, (tsl::defaultOverlayColor));
-            renderer->drawString("Cheats", false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
+        bool setOnce = true; // for ensuring header sync with frame caching for header overlayframe
+
+        rootFrame->setHeader(new tsl::elm::CustomDrawer([this, &setOnce](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
+            renderer->drawString(APP_TITLE, false, 20, 50, 32, (tsl::defaultOverlayColor));
+
+            //static bool runOnce = true;
+            if (setOnce) {
+                renderer->drawString(APP_VERSION, false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
+                setOnce = false;
+            } else {
+                renderer->drawString("Cheats", false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
+            }
+            
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {
-                renderer->drawString("Program ID:", false, 150 +14, 40 -6, 15, (tsl::style::color::ColorText));
-                renderer->drawString("Build ID:", false, 150 +14, 60 -6, 15, (tsl::style::color::ColorText));
-                renderer->drawString("Process ID:", false, 150 +14, 80 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Program ID", false, 150 +14, 40 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Build ID", false, 150 +14, 60 -6, 15, (tsl::style::color::ColorText));
+                renderer->drawString("Process ID", false, 150 +14, 80 -6, 15, (tsl::style::color::ColorText));
                 renderer->drawString(GuiMain::s_runningTitleIDString.c_str(), false, 250 +14, 40 -6, 15, (tsl::style::color::ColorHighlight));
                 renderer->drawString(GuiMain::s_runningBuildIDString.c_str(), false, 250 +14, 60 -6, 15, (tsl::style::color::ColorHighlight));
                 renderer->drawString(GuiMain::s_runningProcessIDString.c_str(), false, 250 +14, 80 -6, 15, (tsl::style::color::ColorHighlight));
@@ -210,6 +221,8 @@ public:
                     this->m_numCheats++;
                 }
             }
+
+            //list->disableCaching();
 
             // display if no cheats in submenu
             if(this->m_numCheats < 1){

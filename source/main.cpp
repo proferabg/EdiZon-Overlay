@@ -110,7 +110,6 @@ public:
     }
     ~GuiCheats() { }
 
-
     virtual tsl::elm::Element* createUI() override {
         auto rootFrame = new tsl::elm::HeaderOverlayFrame(97);
 
@@ -201,7 +200,7 @@ public:
                         replaceAll(cheatNameCheck, ":ENABLED", "");
 
                         auto cheatToggleItem = new tsl::elm::ToggleListItem(/*formatString("%d:%s: %s", cheat->getID(), (cheat->isEnabled() ? "y" : "n"),*/ cheatNameCheck/*.c_str()).c_str()*/, cheat->isEnabled());
-                        cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state);});
+                        cheatToggleItem->setStateChangedListener([&cheat](bool state) { cheat->setState(state); });
 
                         this->m_cheatToggleItems.insert({cheat->getID(), cheatToggleItem});
                         list->addItem(cheatToggleItem);

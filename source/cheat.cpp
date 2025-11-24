@@ -163,7 +163,7 @@ namespace edz::cheat {
         if (running == -1){
             Handle handle;
             SmServiceName service_name = smEncodeName("dmnt:cht");
-            bool running = R_FAILED(smRegisterService(&handle, service_name, false, 1));
+            running = R_FAILED(smRegisterService(&handle, service_name, false, 1));
 
             svcCloseHandle(handle);
 

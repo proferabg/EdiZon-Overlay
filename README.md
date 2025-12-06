@@ -6,9 +6,8 @@ Continued Support by proferabg & ppkantorski
 <br />
 <br />
 
-# Latest Changelog - v1.0.12
-    Added support for HOS 21.0.0
-    Updated libultrahand to v2.1.5
+# Latest Changelog - v1.0.14
+    Update libultrahand to v2.2.0
 <br />
 
 # How To Use Submenus

@@ -112,19 +112,10 @@ public:
 
     virtual tsl::elm::Element* createUI() override {
         auto rootFrame = new tsl::elm::HeaderOverlayFrame(97);
-
-        bool setOnce = true; // for ensuring header sync with frame caching for header overlayframe
-
-        rootFrame->setHeader(new tsl::elm::CustomDrawer([this, &setOnce](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
+        
+        rootFrame->setHeader(new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, s32 x, s32 y, s32 w, s32 h) {
             renderer->drawString(APP_TITLE, false, 20, 50, 32, (tsl::defaultOverlayColor));
-
-            //static bool runOnce = true;
-            if (setOnce) {
-                renderer->drawString(APP_VERSION, false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
-                setOnce = false;
-            } else {
-                renderer->drawString("Cheats", false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
-            }
+            renderer->drawString("Cheats", false, 20, 52+23, 15, (tsl::bannerVersionTextColor));
             
 
             if (edz::cheat::CheatManager::getProcessID() != 0) {

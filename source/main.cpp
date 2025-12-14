@@ -368,7 +368,7 @@ public:
                 renderer->drawString(formatString("%d dBm", signalStrength).c_str(), false, 258, 400, 18, (tsl::style::color::ColorHighlight)); 
             }
             renderer->drawString("Credits:", false, 63, 600, 18, (tsl::style::color::ColorText));
-            renderer->drawString(APP_AUTHOR, false, 75, 630, 18, (tsl::style::color::ColorHighlight)); 
+            renderer->drawString(APP_AUTHOR, false, 63, 630, 18, (tsl::style::color::ColorHighlight)); 
         });
         rootFrame->setContent(infos);
     

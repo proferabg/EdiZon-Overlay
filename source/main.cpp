@@ -65,8 +65,9 @@ public:
 
         if(edz::cheat::CheatManager::isCheatServiceAvailable()){
             auto cheatsItem = new tsl::elm::ListItem("Cheats");
-            cheatsItem->setClickListener([](s64 keys) {
+            cheatsItem->setClickListener([cheatsItem](s64 keys) {
                 if (keys & KEY_A) {
+                    tsl::shiftItemFocus(cheatsItem);
                     tsl::changeTo<GuiCheats>("");
                     return true;
                 }
@@ -79,8 +80,9 @@ public:
         }
 
         auto statsItem  = new tsl::elm::ListItem("System Information");
-        statsItem->setClickListener([](s64 keys) {
+        statsItem->setClickListener([statsItem](s64 keys) {
             if (keys & KEY_A) {
+                tsl::shiftItemFocus(statsItem);
                 tsl::changeTo<GuiStats>();
                 return true;
             }
@@ -171,8 +173,9 @@ public:
 
                         //create submenu button
                         auto cheatsSubmenu = new tsl::elm::ListItem(name);
-                        cheatsSubmenu->setClickListener([name = name](s64 keys) {
+                        cheatsSubmenu->setClickListener([name = name, cheatsSubmenu](s64 keys) {
                             if (keys & KEY_A) {
+                                tsl::shiftItemFocus(cheatsSubmenu);
                                 tsl::changeTo<GuiCheats>(name);
                                 return true;
                             }

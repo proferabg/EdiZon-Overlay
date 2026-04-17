@@ -18,6 +18,7 @@
  */
 
 #define TESLA_INIT_IMPL
+#include <exception_wrap.hpp>
 #include <tesla.hpp>
 
 #include <stdio.h>
@@ -67,7 +68,7 @@ public:
             auto cheatsItem = new tsl::elm::ListItem("Cheats");
             cheatsItem->setClickListener([cheatsItem](s64 keys) {
                 if (keys & KEY_A) {
-                    tsl::shiftItemFocus(cheatsItem);
+                    //tsl::shiftItemFocus(cheatsItem);
                     tsl::changeTo<GuiCheats>("");
                     return true;
                 }
@@ -82,7 +83,7 @@ public:
         auto statsItem  = new tsl::elm::ListItem("System Information");
         statsItem->setClickListener([statsItem](s64 keys) {
             if (keys & KEY_A) {
-                tsl::shiftItemFocus(statsItem);
+                //tsl::shiftItemFocus(statsItem);
                 tsl::changeTo<GuiStats>();
                 return true;
             }
@@ -175,7 +176,7 @@ public:
                         auto cheatsSubmenu = new tsl::elm::ListItem(name);
                         cheatsSubmenu->setClickListener([name = name, cheatsSubmenu](s64 keys) {
                             if (keys & KEY_A) {
-                                tsl::shiftItemFocus(cheatsSubmenu);
+                                //tsl::shiftItemFocus(cheatsSubmenu);
                                 tsl::changeTo<GuiCheats>(name);
                                 return true;
                             }

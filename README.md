@@ -6,8 +6,8 @@ Continued Support by proferabg & ppkantorski
 <br />
 <br />
 
-# Latest Changelog - v1.0.14
-    Update libultrahand to v2.2.0
+# Latest Changelog - v1.0.15
+    Update libultrahand to v2.4.0
 <br />
 
 # How To Use Submenus

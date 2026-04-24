@@ -12,7 +12,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 APP_TITLE		:=	EdiZon
 APP_FILENAME	:=  ovlEdiZon
 APP_AUTHOR		:=	WerWolv, proferabg, and ppkantorski
-APP_VERSION		:=	v1.0.14
+APP_VERSION		:=	v1.0.15
 
 ifeq ($(RELEASE), 1)
 	APP_VERSION	:=	$(APP_VERSION)-$(shell git describe --always)
@@ -38,9 +38,23 @@ SPACE     	:=  $(null) $(null)
 
 ARCH	:=	-march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE
 
-CFLAGS	:= -g -Wall -O3 -ffunction-sections -fdata-sections -flto -ffast-math -fomit-frame-pointer \
-					-fuse-linker-plugin -finline-small-functions -fno-strict-aliasing -frename-registers -falign-functions=16 \
-					$(ARCH) $(DEFINES) -DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
+CFLAGS := -g -Wall -O3 -ffunction-sections -fdata-sections -flto\
+            -ffast-math -fomit-frame-pointer \
+            -fuse-linker-plugin -finline-small-functions \
+            -fno-strict-aliasing -frename-registers -falign-functions=16 \
+			$(ARCH) $(DEFINES)  -DVERSION_STRING=\"$(subst $(SPACE),\$(SPACE),${APP_VERSION})\"
+
+# Enable appearance overriding
+UI_OVERRIDE_PATH := /config/edizon/
+CFLAGS += -DUI_OVERRIDE_PATH="\"$(UI_OVERRIDE_PATH)\""
+
+# Exception wrap utilization (for smaller compilation size)
+CFLAGS += -DUSE_EXCEPTION_WRAP=1
+
+# Requires USE_EXCEPTION_WRAP and inclusion of exception_wrap.hpp in main
+LDFLAGS += -Wl,-wrap,__cxa_throw \
+           -Wl,-wrap,_Unwind_Resume \
+           -Wl,-wrap,__gxx_personality_v0
 
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -D__OVERLAY__ -I$(PORTLIBS)/include/freetype2 $(pkg-config --cflags --libs python3) -Wno-deprecated-declarations 
@@ -49,7 +63,7 @@ CFLAGS	+=	-DAPP_VERSION=\"$(APP_VERSION)\" -DAPP_TITLE=\"$(APP_TITLE)\" -DAPP_AU
 CXXFLAGS	:= $(CFLAGS) -fexceptions -std=c++26
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS	+=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 LIBS	:= -lnx
 

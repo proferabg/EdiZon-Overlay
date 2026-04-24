@@ -157,16 +157,16 @@ namespace edz::cheat {
         CheatManager::s_frozenAddresses.clear();
     }
 
-
+    
     bool CheatManager::isCheatServiceAvailable() {
         static s8 running = -1;
         if (running == -1){
             Handle handle;
             SmServiceName service_name = smEncodeName("dmnt:cht");
-            running = R_FAILED(smRegisterService(&handle, service_name, false, 1));
-
+    
+            running = R_FAILED(smRegisterService(&handle, service_name, false, 1)); // <-- assign to static
             svcCloseHandle(handle);
-
+    
             if (!running)
                 smUnregisterService(service_name);
         }
